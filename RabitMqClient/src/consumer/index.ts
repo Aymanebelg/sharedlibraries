@@ -2,97 +2,72 @@ import * as amqp from "amqplib";
 import ErrorType from "../utils/errorMessages";
 import config from "../config/config";
 
-const sharedConnection: { connection: amqp.Connection | null } = {
-  connection: null,
+const sharedResources = {
+  connection: null as amqp.Connection | null,
+  channel: null as amqp.Channel | null,
 };
-const sharedChannel: { channel: amqp.Channel | null } = { channel: null };
 
-async function createChannel(rabbitMQUrl: string): Promise<amqp.Channel> {
-  if (sharedChannel.channel) {
-    return sharedChannel.channel;
-  }
+async function ensureAMQPChannel(): Promise<amqp.Channel> {
+  if (sharedResources.channel) return sharedResources.channel;
 
-  // Ensures all required configurations are present
-  const { client_cert: clientCert, client_key: clientKey, ca_cert: caCert, passphrase } = config;
-  if (!clientCert || !clientKey || !caCert) {
-    throw new Error(ErrorType.CERT_PATH_NOT_DEFINED);
+  const { client_cert, client_key, ca_cert, passphrase, rabbitmqurl } = config;
+  if (!client_cert || !client_key || !ca_cert || !rabbitmqurl) {
+    throw new Error(ErrorType.CONFIGURATION_ERROR);
   }
 
   try {
-    const connection = await amqp.connect(rabbitMQUrl, {
-      cert: clientCert,
-      key: clientKey,
-      passphrase,
-      ca: [caCert],
-      checkServerIdentity: () => undefined, // Skips hostname/IP check
-    });
+    if (!sharedResources.connection) {
+      sharedResources.connection = await amqp.connect(rabbitmqurl, {
+        cert: client_cert,
+        key: client_key,
+        passphrase,
+        ca: [ca_cert],
+        checkServerIdentity: () => undefined,
+      });
+      setUpConnectionListeners(sharedResources.connection);
+    }
 
-    // Set up event listeners on the connection
-    setUpConnectionListeners(connection);
-
-    const channel = await connection.createChannel();
-    // Persist the connection and channel for reuse
-    sharedConnection.connection = connection;
-    sharedChannel.channel = channel;
-
-    return channel;
+    sharedResources.channel = await sharedResources.connection.createChannel();
+    return sharedResources.channel;
   } catch (error) {
-    console.error("Error creating channel:", error);
+    console.error("Failed to create AMQP channel:", error);
     throw error;
   }
 }
 
 function setUpConnectionListeners(connection: amqp.Connection) {
-  connection.on("error", err => console.error("Shared connection error", err));
-  connection.on("close", () => console.log("Shared connection closed"));
+  connection.on("error", (err) => console.error("AMQP Connection error:", err));
+  connection.on("close", () => console.log("AMQP Connection closed"));
 }
+
+
 export async function consumeMessages(
   exchange: string,
   routingKey: string,
   apiKey: string,
-  callback: (content: string, key: string) => void
+  callback: (content: string, key: string) => void,
 ): Promise<void> {
   try {
-    const rabbitMQUrl = config.rabbitmqurl;
-    const channel = await createChannel(rabbitMQUrl);
+    const channel = await ensureAMQPChannel();
 
-    const queueName = apiKey;
     await channel.assertExchange(exchange, "direct", { durable: true });
-    const assertQueue = await channel.assertQueue(queueName, {
-      exclusive: false,
-      autoDelete: true,
-    });
-    await channel.bindQueue(assertQueue.queue, exchange, routingKey);
+    const { queue } = await channel.assertQueue(apiKey, { exclusive: false, autoDelete: true });
+    await channel.bindQueue(queue, exchange, routingKey);
 
-    console.log(
-      `Waiting for messages in '${queueName}' from '${exchange}' with '${routingKey}'`
-    );
+    console.log(`Subscribed to ${exchange}/${routingKey} via queue ${queue}`);
 
-    await new Promise<void>((resolve, reject) => {
-      channel
-        .consume(
-          queueName,
-          (msg) => {
-            if (msg) {
-              const content = msg.content.toString();
-              const key = msg.fields.routingKey;
+    await channel.consume(queue, (msg) => {
+      if (msg) {
+        const content = msg.content.toString();
+        const key = msg.fields.routingKey;
+        console.log(`Received message: '${content}' with key '${key}'`);
+        callback(content, key);
+        channel.ack(msg);
+      }
+    }, { noAck: false });
 
-              console.log(`Received:'${content}' with key '${key}'`);
-              callback(content, key);
-              channel.ack(msg);
-            }
-          },
-          { noAck: false }
-        )
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error consuming messages:", error);
     throw error;
   }
 }

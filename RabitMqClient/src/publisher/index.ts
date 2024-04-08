@@ -10,7 +10,7 @@ export async function sendMessage (
 ): Promise<void> {
   try {
     const passphrase = config.passphrase
-    if (!config.client_cert || !config.client_key || !config.ca_cert) {
+    if (!config.client_cert || !config.client_key || !config.ca_cert || !config.rabbitmqurl) {
       throw new Error(ErrorType.CERT_PATH_NOT_DEFINED)
     }
     const clientCert = config.client_cert
@@ -28,6 +28,10 @@ export async function sendMessage (
     const channel: amqp.Channel = await connection.createChannel()
 
     await channel.assertExchange(exchange, 'direct', { durable: true })
+
+    console.log("API Key:", apiKey); 
+    console.log("Message:", message); 
+
     channel.publish(exchange, routingKey, Buffer.from(message))
 
     await channel.close()

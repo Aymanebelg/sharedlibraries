@@ -3,16 +3,16 @@ import * as winston from 'winston';
 import { format } from 'winston';
 import * as DailyRotateFile from 'winston-daily-rotate-file';
 
+
 const getLabel = (callingModule?: NodeModule): string => {
-  if (!callingModule) return ''
-  const parts = callingModule.filename.split(path.sep)
-  const rootIndex = parts.findIndex(part => part === 'src')
-  if (rootIndex >= 0) {
-    return parts.slice(rootIndex).join(path.sep)
-  } else {
-    return rootIndex >= 0 ? parts.slice(rootIndex).join(path.sep) : callingModule.filename;
-  }
-}
+  if (!callingModule) return '';
+
+  const parts = callingModule.filename.split(path.sep);
+  const rootIndex = parts.findIndex(part => part === 'src');
+
+  return rootIndex >= 0 ? parts.slice(rootIndex).join(path.sep) : callingModule.filename;
+};
+
 
 const getColor = (level: string): string => {
   switch (level) {
