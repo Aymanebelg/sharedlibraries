@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - development
-    paths:
-        - 'Logger/**'
-        - '.github/workflows/publish-logger-to-verdaccio.yml'
 
 jobs:
   publish:

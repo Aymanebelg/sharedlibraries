@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - development
-    paths:
-        - 'CommonMessages/**'
-        - '.github/workflows/publish-common-messages-to-verdaccio.yml'
+
 
 jobs:
   publish:

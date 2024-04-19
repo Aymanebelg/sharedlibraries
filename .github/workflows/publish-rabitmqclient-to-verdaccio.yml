@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - development
-    paths:
-        - 'RabitMqClient/**'
-        - '.github/workflows/publish-rabitmqclient-to-verdaccio.yml'
 
 jobs:
   publish:
