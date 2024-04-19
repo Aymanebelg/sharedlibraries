@@ -14,6 +14,10 @@ jobs:
     environment: Dev
     steps:
       - uses: actions/checkout@v3
+
+      - name: Change to CommonMessages directory
+        run: cd CommonMessages
+
       - name: 'Install dependencies'
         uses: actions/setup-node@v1
         with:
@@ -26,4 +30,4 @@ jobs:
 
         
       - name: publish the new package version
-        run: npm publish --registry http://${{ env.VERDACCIO_REGISTRY }}/ --//${{ env.VERDACCIO_REGISTRY }}/:_authToken=${{ secrets.VERDACCIO_TOKEN }}
+        run: npm publish --registry http://${{ secrets.VERDACCIO_REGISTRY }}/ --//${{ secrets.VERDACCIO_REGISTRY }}/:_authToken=${{ secrets.VERDACCIO_TOKEN }}

@@ -14,6 +14,10 @@ jobs:
     environment: Dev
     steps:
       - uses: actions/checkout@v3
+
+      - name: Change to Logger directory
+        run: cd Logger
+
       - name: 'Install dependencies'
         uses: actions/setup-node@v1
         with:
