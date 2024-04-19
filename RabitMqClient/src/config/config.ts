@@ -14,11 +14,11 @@ interface Config {
 }
 
 const config: Config = {
-  rabbitmqurl: process.env.RABBIT_MQ_URL ?? 'amqps://localhost:5671',
-  client_cert: process.env.CLIENT_CERT_PATH ?? '',
-  client_key: process.env.CLIENT_KEY_PATH ?? '',
-  ca_cert: process.env.CA_CERT_PATH ?? '',
-  passphrase: process.env.PASSPHRASE ?? ''
+  rabbitmqurl: process.env.RABBITMQ_URL ?? 'amqps://localhost:5671',
+  client_cert: process.env.RABBITMQ_CLIENT_CERTIFICATE ?? '',
+  client_key: process.env.RABBITMQ_CLIENT_PRIVATE_KEY ?? '',
+  ca_cert: process.env.RABBITMQ_CA_CERTIFICATE ?? '',
+  passphrase: process.env.RABBITMQ_CERT_PASSWORD ?? ''
 }
 
 export default config

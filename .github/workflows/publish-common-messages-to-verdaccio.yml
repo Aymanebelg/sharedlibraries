@@ -1,0 +1,29 @@
+name: Publish Packages to Verdaccio
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+        - 'CommonMessages/**'
+        - '.github/workflows/publish-common-messages-to-verdaccio.yml'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Install dependencies'
+        uses: actions/setup-node@v1
+        with:
+          node-version: 20
+        run: npm install
+
+      - name: Unpublish existing package version
+        run: npm unpublish --force
+        continue-on-error: true
+
+        
+      - name: publish the new package version
+        run: npm publish --registry http://${{ env.VERDACCIO_REGISTRY }}/ --//${{ env.VERDACCIO_REGISTRY }}/:_authToken=${{ secrets.VERDACCIO_TOKEN }}
