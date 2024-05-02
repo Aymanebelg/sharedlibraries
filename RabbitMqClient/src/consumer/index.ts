@@ -2,7 +2,7 @@ import * as amqp from "amqplib";
 import ErrorType from "../utils/errorMessages";
 import config from "../config/config";
 import { Logger } from "winston";
-
+import Request from "../models/request";
 /**
  * An object to hold shared AMQP resources like connection and channel.
  */
@@ -67,38 +67,38 @@ function setUpConnectionListeners(connection: amqp.Connection, logger: Logger) {
  */
 export const consumeMessages = (createLogger: ((callingModule?: NodeModule, path?: string) => Logger)): 
 ((
-  exchange: string, 
-  routingKey: string, 
-  apiKey: string, 
-  callback: (content: object | string, key: string) => void
+  topic: string,
+  consumerApiKey: string, 
+  callback: (content: any) => void
   ) => Promise<void>
 ) => {
   const logger = createLogger(undefined, 'RabbitMqClient/consumer/index.ts')
-  return async (exchange: string, routingKey: string, apiKey: string, callback: (content: object | string, key: string) => void): Promise<void> => {
+  return async (topic: string, consumerApiKey: string, callback: (content: any) => void): Promise<void> => {
     try {
       const channel = await ensureAMQPChannel(logger);
-      await channel.assertExchange(exchange, "direct", { durable: true });
-      const { queue } = await channel.assertQueue(apiKey, { exclusive: false, autoDelete: true });
-      await channel.bindQueue(queue, exchange, routingKey);
-      logger.info(`Subscribed to ${exchange}/${routingKey} via queue ${queue}.`);
+      await channel.assertExchange(topic, "direct", { durable: true });
+      const { queue } = await channel.assertQueue(consumerApiKey, { exclusive: false, autoDelete: true });
+      await channel.bindQueue(queue, topic, topic);
+      logger.info(`Subscribed to ${topic} via queue ${topic}/${queue}.`);
 
       logger.info('Waiting for publishers requests...')
       await channel.consume(queue, (msg) => {
         if (msg) {
-          const request = JSON.parse(msg.content.toString());
+          const request = JSON.parse(msg.content.toString()) as Request;
 
-          logger.info(`Data arrived from apiKey: ${request.apikey} in queue ${queue} via exchange ${exchange}.`)
+          logger.info(`Data arrived from apiKey: ${request.publisherApikey} in queue ${topic}/${queue}.`)
 
-          logger.info(`Consuming data from queue ${queue} via exchange ${exchange}.`)
-          const key = msg.fields.routingKey;
-          callback(request.data, key);
-          logger.info(`The data arriving from ${apiKey} has been consumed successfully from queue ${queue} via exchange ${exchange}.`)
+          logger.info(`Consuming data from queue ${topic}/${queue}...`)
+          Promise
+          .resolve(callback(request.data))
+          .catch((err) => { logger.error(`Error calling the callback: ${(err as Error).message}`) })
+          
           channel.ack(msg);
         }
       }, { noAck: false });
-
     } catch (error) {
-      logger.error(`${ErrorType.CONSUME_ERROR}: ${(error as Error).message}`)
+      logger.error(`${ErrorType.CONSUMER_ERROR}: ${(error as Error).message}`)
+      throw new Error(error.message);
     }
   }
 }

@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "module": "CommonJS", // Set module system to CommonJS to generate compatible JS code
     // other compiler options...
   },
   "include": [

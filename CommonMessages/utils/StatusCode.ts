@@ -37,6 +37,12 @@ const StatusCode = {
    * 429 Too Many Requests - The user has sent too many requests in a given amount of time ("rate limiting").
    */
   TOO_MANY_REQUESTS: 429,
+  
+  /**
+   * 403 Forbidden - The server understood the request, but is refusing to fulfill it.
+   */
+  FORBIDDEN: 403
+
 }
 
 export default StatusCode

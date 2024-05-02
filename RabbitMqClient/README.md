@@ -13,13 +13,13 @@
 Sends a message to a specified RabbitMQ exchange and routing key. The apiKey and message content are included within the request object.
 
     import { createLogger } from 'dev.linkopus.logger'; // Ensure to import Logger
+    const publish = sendMessage(createLogger)
 
     // Function call to send a message
-    sendMessage(createLogger)(
-        'exchange',           // Exchange to publish the message
-        'routingKey',         // Routing key for the message
-        { apikey: 'apiKey', data: 'Hello RabbitMQ!' }, // Request object with API key and message
-        'consumerApiKey'      // Consumer API key if needed
+    publish(
+        'topic',           // Topic to publish the message
+        'data',         //  data for the message
+        'publisherApiKey', // Publisher API key to publish the message (Current MicroService's apiKey)
     );
 
 **consumeMessages function:**
@@ -27,13 +27,13 @@ Sends a message to a specified RabbitMQ exchange and routing key. The apiKey and
 Consumes messages from a specified RabbitMQ exchange and routing key using a callback to handle the messages.
 
     import { createLogger } from 'dev.linkopus.logger'; // Ensure to import Logger
+    const subscribe = consumeMessages(createLogger)
 
     // Function call to consume messages
-    consumeMessages(createLogger)(
-        'exchange',          // Exchange to subscribe
-        'routingKey',        // Routing key to bind
-        'apiKey',            // API key for the consumer
-        (content, key) => {  // Callback function to handle received messages
+    subscribe(
+        'topic',          // Exchange to subscribe
+        'consumerApiKey',            // API key for the consumer (current MicroService's apiKey)
+        (content) => {  // Callback function to handle received messages
             console.log(`Message received: ${content} with routingKey: ${key}`);
         }
     );
