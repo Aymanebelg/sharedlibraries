@@ -63,7 +63,7 @@ const logger = (callingModule?: NodeModule, path?: string): winston.Logger => {
     transports: [
       new winston.transports.Console(),
       new DailyRotateFile({
-        filename: 'logs/aiService-%DATE%.log',
+        filename: 'logs/%DATE%.log',
         datePattern: 'YYYY-MM-DD',
         zippedArchive: true,
         maxSize: '20m',

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "./dist",
+    "module": "CommonJS", // Set module system to CommonJS to generate compatible JS code
+    // other compiler options...
+  },
+  "include": [
+    "src/**/*.ts" // Include TypeScript files directly in the root directory
+  ],
+  "exclude": ["node_modules"]
+}

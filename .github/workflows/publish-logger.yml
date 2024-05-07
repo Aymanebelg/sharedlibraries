@@ -31,5 +31,5 @@ jobs:
             - name: Install package dependencies
               run: npm install
 
-            - name: Publish CommonMessages package to Verdaccio
+            - name: Publish Logger package to Verdaccio
               run: npm publish

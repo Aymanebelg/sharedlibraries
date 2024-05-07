@@ -1,0 +1,25 @@
+{
+  "name": "dev.linkopus.redis-client",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "find-config": "^1.0.0",
+    "ioredis": "^5.4.1",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@types/find-config": "^1.0.4",
+    "@types/node": "^20.11.21"
+  },
+  "files": [
+    "dist"
+  ]
+}

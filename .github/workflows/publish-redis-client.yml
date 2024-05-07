@@ -1,12 +1,12 @@
-name: Publish RabbitMqClient package to Verdaccio in development environment
+name: Publish RedisClient package to Verdaccio in development environment
 
 on:
     push:
       branches:
         - development
       paths:
-        - 'RabbitMqClient/**'
-        - '.github/workflows/publish-rabbit-mq-client.yml'
+        - 'RedisClient/**'
+        - '.github/workflows/publish-redis-client.yml'
 
 jobs:
     publish-to-verdaccio:
@@ -14,7 +14,7 @@ jobs:
         environment: Dev
         defaults:
           run:
-            working-directory: './RabbitMqClient'
+            working-directory: './RedisClient'
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
@@ -31,5 +31,5 @@ jobs:
             - name: Install package dependencies
               run: npm install
 
-            - name: Publish RabbitMqClient package to Verdaccio
+            - name: Publish RedisClient package to Verdaccio
               run: npm publish
