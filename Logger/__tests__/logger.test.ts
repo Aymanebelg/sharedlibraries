@@ -19,6 +19,7 @@ describe('Logger Module', () => {
     })[Symbol.for('message')];
 
     expect(logMessage).toContain(`[src${path.sep}module${path.sep}testFile.ts]`);
+    
   });
 
   test('getLabel should return the full path if "src" is not in the path', () => {
