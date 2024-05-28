@@ -3,7 +3,7 @@ name: Run Tests and Coverage
 on:
   push:
     paths:
-      - 'sharedLibraries/**'
+      - 'sharedLibraries/sharedLibraries/**'
   pull_request:
     paths:
       - 'sharedLibraries/**'
