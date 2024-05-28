@@ -21,28 +21,43 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Run tests and coverage for changed folders
+    - name: Set up matrix for changed folders
+      id: set_matrix
       run: |
         folders=("CommonMessages" "Logger" "RedisClient" "RabbitMqClient" "Supervision")
-
-        echo "Checking changes between commits $previous_commit and $current_commit"
+        jobs_matrix=""
 
         for folder in "${folders[@]}"; do
           if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
-            echo "$folder has changed"
-
-            # Test
-            echo "Running npm test in $folder"
-            cd $folder
-            npm install
-            npm run test
-            cd ..
-
-            # Coverage
-            echo "Running npm coverage in $folder"
-            cd $folder
-            npm install
-            npm run coverage
-            cd ..
+            jobs_matrix="$jobs_matrix{\"folder\": \"$folder\", \"job\": \"test\"},"
+            jobs_matrix="$jobs_matrix{\"folder\": \"$folder\", \"job\": \"coverage\"},"
           fi
         done
+
+        # Remove the trailing comma
+        jobs_matrix="[${jobs_matrix%,}]"
+        echo "jobs_matrix=$jobs_matrix" >> $GITHUB_ENV
+
+    - name: Save matrix
+      id: save_matrix
+      run: echo "${{ env.jobs_matrix }}"
+
+  dynamic_jobs:
+    runs-on: ubuntu-latest
+    needs: test_and_coverage
+    strategy:
+      matrix:
+        config: ${{ fromJson(needs.test_and_coverage.outputs.jobs_matrix) }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Run job
+      run: |
+        cd ${{ matrix.config.folder }}
+        npm install
+        if [ "${{ matrix.config.job }}" == "test" ]; then
+          npm run test
+        else
+          npm run coverage
+        fi
