@@ -18,17 +18,6 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        run: npm install
-
       - name: Get list of changed files
         id: changes
         run: |
@@ -44,7 +33,9 @@ jobs:
       - name: Run tests and coverage
         run: |
           for folder in ${{ steps.folders.outputs.folders }}; do
-            cd $folder/__tests__
+            cd $folder
+            npm install
+            cd __tests__
             npm run test
             npm run coverage
             cd ../..
