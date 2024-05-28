@@ -13,7 +13,7 @@ jobs:
       run: git fetch --prune --unshallow
 
     - name: Setup script permissions
-      run: chmod +x ../../scripts/check-and-run.sh
+      run: chmod +x ./check-and-run.sh
 
     - name: Determine the commit range
       id: commit_range
@@ -25,7 +25,7 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run tests
-      run: ../../scripts/check-and-run.sh test
+      run: ./check-and-run.sh test
 
   coverage:
     runs-on: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
       run: git fetch --prune --unshallow
 
     - name: Setup script permissions
-      run: chmod +x ../../scripts/check-and-run.sh
+      run: chmod +x ./check-and-run.sh
 
     - name: Determine the commit range
       id: commit_range
@@ -49,4 +49,4 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run coverage
-      run: ../../scripts/check-and-run.sh coverage
+      run: ./check-and-run.sh coverage
