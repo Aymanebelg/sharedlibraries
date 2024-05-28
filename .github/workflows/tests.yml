@@ -41,12 +41,16 @@ jobs:
           for folder in "${folders[@]}"; do
             if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
               echo "$folder has changed"
-              changed_folders+=($folder)
+              changed_folders+=("$folder")
             fi
           done
 
           # Convert the array to JSON
-          changed_folders_json=$(printf '%s\n' "${changed_folders[@]}" | jq -R . | jq -s .)
+          if [ ${#changed_folders[@]} -eq 0 ]; then
+            changed_folders_json="[]"
+          else
+            changed_folders_json=$(printf '%s\n' "${changed_folders[@]}" | jq -R . | jq -s .)
+          fi
           
           # Save the changed folders to be used in the next step
           echo "::set-output name=changed_folders::$changed_folders_json"
