@@ -2,35 +2,31 @@ name: Run Tests and Coverage
 
 on:
   push:
-    branches:
-      - development
+    paths:
+      - 'sharedLibraries/**'
+  pull_request:
+    paths:
+      - 'sharedLibraries/**'
 
 jobs:
-  test:
+  check-and-test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        folder: [CommonMessages, Logger, RabbitMqClient, RedisClient, Supervision]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          node-version: '16'
+          python-version: '3.8'
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
         run: |
-          cd ${{ matrix.folder }}/__tests__
-          npm run test
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run coverage
+      - name: Run custom script
         run: |
-          cd ${{ matrix.folder }}/__tests__
-          npm run coverage
+          chmod +x .github/scripts/check_and_test.sh
+          .github/scripts/check_and_test.sh
