@@ -38,6 +38,7 @@ jobs:
         done
 
         echo "changed_folders=$changed_folders" >> $GITHUB_ENV
+        echo "::set-output name=changed_folders::$(echo $changed_folders)"
 
     - name: Log changed folders
       run: |
@@ -52,6 +53,7 @@ jobs:
   test:
     needs: check-folder-changes
     runs-on: ubuntu-latest
+    if: ${{ needs.check-folder-changes.outputs.changed_folders != '' }}
     strategy:
       matrix:
         folder: ${{ fromJson(needs.check-folder-changes.outputs.changed_folders) }}
@@ -70,6 +72,7 @@ jobs:
   coverage:
     needs: check-folder-changes
     runs-on: ubuntu-latest
+    if: ${{ needs.check-folder-changes.outputs.changed_folders != '' }}
     strategy:
       matrix:
         folder: ${{ fromJson(needs.check-folder-changes.outputs.changed_folders) }}
