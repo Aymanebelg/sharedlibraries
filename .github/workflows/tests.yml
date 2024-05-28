@@ -1,9 +1,6 @@
 name: Run Tests and Coverage
 
-on:
-  push:
-    branches:
-      - development
+on: [push, pull_request]
 
 jobs:
   test:
@@ -14,24 +11,21 @@ jobs:
         folder: [CommonMessages, Logger, RabbitMqClient, RedisClient, Supervision]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14' # Specify the version of Node.js you are using
 
-    - name: Install root dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Install package dependencies
-      run: |
-        cd ${{ matrix.folder }}
-        npm install
+      - name: Run tests
+        working-directory: ${{ matrix.folder }}/__tests__
+        run: npm run test
 
-    - name: Run tests
-      run: |
-        cd ${{ matrix.folder }}/__tests__
-        npm run test
-        npm run coverage
+      - name: Run coverage
+        working-directory: ${{ matrix.folder }}/__tests__
+        run: npm run coverage
