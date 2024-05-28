@@ -15,7 +15,7 @@ for folder in $(ls -d */ | cut -f1 -d'/'); do
     echo "Running npm $COMMAND in $folder"
     cd $folder
     npm install
-    npm run $COMMAND
+    npm run test
     cd ..
   fi
 done
