@@ -25,7 +25,7 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run tests
-      run: npm run test
+      run: ./.github/scripts/check-and-run.sh test
 
   coverage:
     runs-on: ubuntu-latest
@@ -49,4 +49,4 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run coverage
-      run: npm run coverage
+      run: ./.github/scripts/check-and-run.sh coverage
