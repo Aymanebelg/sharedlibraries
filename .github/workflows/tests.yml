@@ -32,7 +32,7 @@ jobs:
           folders=("CommonMessages" "Logger" "RedisClient" "RabbitMqClient" "Supervision")
           
           # Initialize a variable to hold changed folders
-          changed_folders=""
+          changed_folders=()
 
           # Log the commit range
           echo "Checking changes between commits $previous_commit and $current_commit"
@@ -41,14 +41,17 @@ jobs:
           for folder in "${folders[@]}"; do
             if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
               echo "$folder has changed"
-              changed_folders+="$folder "
+              changed_folders+=($folder)
             fi
           done
 
+          # Convert the array to JSON
+          changed_folders_json=$(printf '%s\n' "${changed_folders[@]}" | jq -R . | jq -s .)
+          
           # Save the changed folders to be used in the next step
-          echo "::set-output name=changed_folders::$changed_folders"
+          echo "::set-output name=changed_folders::$changed_folders_json"
 
-  create-jobs:
+  test:
     needs: determine-changes
     runs-on: ubuntu-latest
     strategy:
@@ -59,7 +62,6 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run npm test
-        if: matrix.folder != ''
         run: |
           echo "Running npm test in ${{ matrix.folder }}"
           cd ${{ matrix.folder }}
@@ -77,7 +79,6 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run npm coverage
-        if: matrix.folder != ''
         run: |
           echo "Running npm coverage in ${{ matrix.folder }}"
           cd ${{ matrix.folder }}

@@ -122,7 +122,7 @@ describe('errorHandlerMiddleware', () => {
 
     const errorBody: errorBody = { status: StatusCode.BAD_REQUEST, name: ErrorTypes.BAD_REQUEST, details: 'Bad request' }
     const apiError = new ApiError(errorBody, logger)
-
+ 
     const middleware = errorHandlerMiddleware(logger)
     middleware(apiError, req, res, next)
 
