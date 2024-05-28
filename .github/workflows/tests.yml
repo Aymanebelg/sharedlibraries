@@ -1,6 +1,8 @@
-name: Folder Changes
+name: Quality Assurance GitHub Actions Workflow
 
-on: [push]
+on:
+  pull_request:
+    branches: [development]
 
 jobs:
   test:
@@ -66,3 +68,12 @@ jobs:
             cd ..
           fi
         done
+  check-pr-title:
+          runs-on: ubuntu-latest
+          permissions:
+            pull-requests: write
+          steps:
+            - name: Check Title Format
+              uses: deepakputhraya/action-pr-title@master
+              with:
+                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'

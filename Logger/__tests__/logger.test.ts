@@ -55,7 +55,7 @@ describe('Logger Module', () => {
       timestamp: '2024-05-24 12:00:00',
       label: 'src/module/testFile.ts'
     }) as TransformableInfo;
-
+ 
     const formattedMessage = logEntry[Symbol.for('message')];
     expect(formattedMessage).toMatch(/INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \[src\/module\/testFile\.ts\] Test message/);
   });

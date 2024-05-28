@@ -5,7 +5,7 @@ import ApiError from '../../utils/ApiError'
 import StatusCode from '../../utils/StatusCode'
 import ErrorTypes from '../../utils/errorTypes'
 import type errorBody from '../../models/errorBody'
-
+ 
 const logger = {
   error: jest.fn(),
   warn: jest.fn(),
