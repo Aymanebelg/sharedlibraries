@@ -6,7 +6,7 @@ import Request from "../models/request";
 /**
  * An object to hold shared AMQP resources like connection and channel.
  */
-const sharedResources = {
+export const sharedResources = {
   connection: null as amqp.Connection | null,
   channel: null as amqp.Channel | null,
 };

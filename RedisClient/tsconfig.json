@@ -3,10 +3,8 @@
     "declaration": true,
     "outDir": "./dist",
     "module": "CommonJS", // Set module system to CommonJS to generate compatible JS code
-    // other compiler options...
+    "types": ["jest", "node"]
   },
-  "include": [
-    "src/**/*.ts" // Include TypeScript files directly in the root directory
-  ],
+  "include": ["src/**/*.ts", "jest.config.ts", "**/*.test.ts"],
   "exclude": ["node_modules"]
 }

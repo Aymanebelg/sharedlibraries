@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "types": ["jest", "node"], 
     // other compiler options...
   },
   "include": [
-    "*.ts" // Include TypeScript files directly in the root directory
+    "*.ts",
+    "jest.config.ts",
+    "**/*.test.ts"
   ],
   "exclude": ["node_modules"]
 }

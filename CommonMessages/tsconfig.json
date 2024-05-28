@@ -9,7 +9,9 @@
     "strict": true, // Enable strict type-checking options
   },
   "include": [
-    "./**.ts", // Include TypeScript files directly in the root directory
+    "./**.ts", 
+    "jest.config.ts", 
+    "**/*.test.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -7,7 +7,9 @@
     "module": "CommonJS"
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "jest.config.ts", 
+    "**/*.test.ts"
   ],
   "exclude": ["node_modules"]
 }
