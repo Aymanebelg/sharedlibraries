@@ -120,7 +120,7 @@ describe('Logger Module', () => {
     
     const filePath = (transport as any).dirname + '/' + (transport as any).filename.replace('%DATE%', '2024-05-24');
     fs.writeFileSync(filePath, '');
-    expect(fs.existsSync(filePath)).toBe(true);
+    expect(fs.existsSync(filePath)).toBe(true); 
   });
 
 
