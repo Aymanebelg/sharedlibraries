@@ -16,6 +16,7 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
+        # Get the previous commit (if this is not the first push)
         previous_commit=$(git rev-parse HEAD~1)
         current_commit=$(git rev-parse HEAD)
 
@@ -25,11 +26,16 @@ jobs:
     - name: Check for folder changes
       id: check_changes
       run: |
+        # List of folders to check
         folders=("CommonMessages" "Logger" "RedisClient" "RabbitMqClient" "Supervision")
+        
+        # Initialize a variable to hold changed folders
         changed_folders=""
 
+        # Log the commit range
         echo "Checking changes between commits $previous_commit and $current_commit"
 
+        # Check if any of the folders have changed
         for folder in "${folders[@]}"; do
           if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
             echo "$folder has changed"
@@ -37,8 +43,8 @@ jobs:
           fi
         done
 
+        # Save the changed folders to be used in the next step
         echo "changed_folders=$changed_folders" >> $GITHUB_ENV
-        echo "::set-output name=changed_folders::$(echo $changed_folders)"
 
     - name: Log changed folders
       run: |
@@ -50,40 +56,20 @@ jobs:
       env:
         changed_folders: ${{ env.changed_folders }}
 
-  test:
-    needs: check-folder-changes
-    runs-on: ubuntu-latest
-    if: ${{ needs.check-folder-changes.outputs.changed_folders != '' }}
-    strategy:
-      matrix:
-        folder: ${{ fromJson(needs.check-folder-changes.outputs.changed_folders) }}
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Run tests
+    - name: Run npm commands for changed folders
+      if: env.changed_folders != ''
       run: |
-        echo "Running tests in ${{ matrix.folder }}"
-        cd ${{ matrix.folder }}
-        npm install
-        npm run test
+        # Convert the space-separated list of changed folders into an array
+        IFS=' ' read -r -a folders_array <<< "$changed_folders"
 
-  coverage:
-    needs: check-folder-changes
-    runs-on: ubuntu-latest
-    if: ${{ needs.check-folder-changes.outputs.changed_folders != '' }}
-    strategy:
-      matrix:
-        folder: ${{ fromJson(needs.check-folder-changes.outputs.changed_folders) }}
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Run coverage
-      run: |
-        echo "Running coverage in ${{ matrix.folder }}"
-        cd ${{ matrix.folder }}
-        npm install
-        npm run coverage
+        # Loop through each changed folder and run npm commands
+        for folder in "${folders_array[@]}"; do
+          echo "Running npm commands in $folder"
+          cd $folder
+          npm install
+          npm run test
+          npm run coverage
+          cd ..
+        done
+      env:
+        changed_folders: ${{ env.changed_folders }}

@@ -116,7 +116,7 @@ describe('errorHandlerMiddleware', () => {
     const req = {} as Request
     const res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
+      json: jest.fn() 
     } as unknown as Response
     const next = jest.fn() as unknown as NextFunction
 
