@@ -1,44 +1,35 @@
-name: Log Changed Folder
+name: Run Tests and Coverage
 
 on:
   push:
-    paths:
-      - 'CommonMessages/**'
-      - 'Logger/**'
-      - 'RabbitMqClient/**'
-      - 'RedisClient/**'
-      - 'Supervision/**'
+    branches:
+      - main
   pull_request:
-    paths:
-      - 'CommonMessages/**'
-      - 'Logger/**'
-      - 'RabbitMqClient/**'
-      - 'RedisClient/**'
-      - 'Supervision/**'
+    branches:
+      - main
 
 jobs:
-  log_changed_folder:
+  test:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        folder: [CommonMessages, Logger, RabbitMqClient, RedisClient, Supervision]
+
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Log changed folder
-      id: detect-changes
-      run: |
-        if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^CommonMessages/'; then
-          echo "::set-output name=folder::CommonMessages"
-        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Logger/'; then
-          echo "::set-output name=folder::Logger"
-        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RabbitMqClient/'; then
-          echo "::set-output name=folder::RabbitMqClient"
-        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RedisClient/'; then
-          echo "::set-output name=folder::RedisClient"
-        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Supervision/'; then
-          echo "::set-output name=folder::Supervision"
-        else
-          echo "::set-output name=folder::None"
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
 
-    - name: Log the changed folder
-      run: echo "The changed folder is ${{ steps.detect-changes.outputs.folder }}"
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: |
+        cd ${{ matrix.folder }}/__tests__
+        npm run test
+        npm run coverage
