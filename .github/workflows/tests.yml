@@ -1,58 +1,72 @@
-name: Run Tests and Coverage
+name: Log Changed Folders
 
-on:
+on: 
   push:
     paths:
-      - '**/CommonMessages/**'
-      - '**/Logger/**'
-      - '**/RabbitMqClient/**'
-      - '**/RedisClient/**'
-      - '**/Supervision/**'
-  pull_request:
-    paths:
-      - '**/CommonMessages/**'
-      - '**/Logger/**'
-      - '**/RabbitMqClient/**'
-      - '**/RedisClient/**'
-      - '**/Supervision/**'
+      - 'CommonMessages/**'
+      - 'Logger/**'
+      - 'RabbitMqClient/**'
+      - 'RedisClient/**'
+      - 'Supervision/**'
+      - '.github/workflows/tests.yml'
 
 jobs:
-  detect_changes:
+  check_changes:
     runs-on: ubuntu-latest
-    outputs:
-      changed_folders: ${{ steps.detect_changes.outputs.changed_folders }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Detect changed folders
-      id: detect_changes
-      run: |
-        CHANGED_FOLDERS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^(CommonMessages|Logger|RabbitMqClient|RedisClient|Supervision)' | sort -u)
-        echo "Changed folders: $CHANGED_FOLDERS"
-        echo "changed_folders=$CHANGED_FOLDERS" >> $GITHUB_ENV
-        echo "::set-output name=changed_folders::$CHANGED_FOLDERS"
+      - name: Check for changes in CommonMessages
+        id: common_messages
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^CommonMessages/'; then
+            echo "::set-output name=common_messages::CommonMessages"
+          fi
 
-  test:
-    needs: detect_changes
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        folder: [CommonMessages, Logger, RabbitMqClient, RedisClient, Supervision]
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Check for changes in Logger
+        id: logger
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Logger/'; then
+            echo "::set-output name=logger::Logger"
+          fi
 
-    - name: Log changed folders
-      run: |
-        echo "Running tests for folders: ${{ needs.detect_changes.outputs.changed_folders }}"
+      - name: Check for changes in RabbitMqClient
+        id: rabbitmq_client
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RabbitMqClient/'; then
+            echo "::set-output name=rabbitmq_client::RabbitMqClient"
+          fi
 
-    - name: Run tests and coverage
-      if: contains(needs.detect_changes.outputs.changed_folders, matrix.folder)
-      run: |
-        cd ${{ matrix.folder }}
-        npm install
-        npm install ts-node --save-dev
-        cd __tests__
-        npm run test
-        npm run coverage
+      - name: Check for changes in RedisClient
+        id: redis_client
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RedisClient/'; then
+            echo "::set-output name=redis_client::RedisClient"
+          fi
+
+      - name: Check for changes in Supervision
+        id: supervision
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Supervision/'; then
+            echo "::set-output name=supervision::Supervision"
+          fi
+
+      - name: Log changed folders
+        run: |
+          echo "Changed folders:"
+          if [ "${{ steps.common_messages.outputs.common_messages }}" ]; then
+            echo "CommonMessages"
+          fi
+          if [ "${{ steps.logger.outputs.logger }}" ]; then
+            echo "Logger"
+          fi
+          if [ "${{ steps.rabbitmq_client.outputs.rabbitmq_client }}" ]; then
+            echo "RabbitMqClient"
+          fi
+          if [ "${{ steps.redis_client.outputs.redis_client }}" ]; then
+            echo "RedisClient"
+          fi
+          if [ "${{ steps.supervision.outputs.supervision }}" ]; then
+            echo "Supervision"
+          fi
