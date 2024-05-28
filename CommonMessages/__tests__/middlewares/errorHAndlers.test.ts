@@ -128,7 +128,7 @@ describe('errorHandlerMiddleware', () => {
  
     expect(res.status).toHaveBeenCalledWith(StatusCode.BAD_REQUEST)
     expect(res.json).toHaveBeenCalledWith({ error: { name: ErrorTypes.BAD_REQUEST, details: 'Bad request'}      })
-  
+   
   })    
 })   
    
