@@ -20,4 +20,4 @@ jobs:
         npm install
         cd __tests__
         npm run test
-        npm run coverage
+        npm run coverage 
