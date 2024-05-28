@@ -1,6 +1,9 @@
 name: Run Tests and Coverage
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - development
 
 jobs:
   test:
@@ -12,20 +15,22 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '14' # Specify the version of Node.js you are using
+          node-version: '16'
 
       - name: Install dependencies
         run: npm install
 
       - name: Run tests
-        working-directory: ${{ matrix.folder }}/__tests__
-        run: npm run test
+        run: |
+          cd ${{ matrix.folder }}/__tests__
+          npm run test
 
       - name: Run coverage
-        working-directory: ${{ matrix.folder }}/__tests__
-        run: npm run coverage
+        run: |
+          cd ${{ matrix.folder }}/__tests__
+          npm run coverage
