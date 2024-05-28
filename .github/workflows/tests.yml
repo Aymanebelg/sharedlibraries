@@ -24,16 +24,65 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Determine changed folder
-      id: determine_folder
-      run: |
-        CHANGED_FOLDER=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^(\S+)/' | head -1)
-        echo "::set-output name=folder::$CHANGED_FOLDER"
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
 
-    - name: Run tests and coverage
-      if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed') }}
+    - name: Install dependencies
+      run: npm install
+
+    - name: Check for changed folders
+      id: check_folders
       run: |
-        cd ${{ steps.determine_folder.outputs.folder }}
+        CHANGED_FOLDERS=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -oE '^(CommonMessages|Logger|RabbitMqClient|RedisClient|Supervision)' | sort -u)
+        echo "Changed folders: $CHANGED_FOLDERS"
+        echo "changed_folders=$CHANGED_FOLDERS" >> $GITHUB_ENV
+
+    - name: Run tests and coverage for CommonMessages
+      if: contains(env.changed_folders, 'CommonMessages')
+      run: |
+        cd CommonMessages
+        npm install
+        npm install ts-node --save-dev
+        cd __tests__
+        npm run test
+        npm run coverage
+
+    - name: Run tests and coverage for Logger
+      if: contains(env.changed_folders, 'Logger')
+      run: |
+        cd Logger
+        npm install
+        npm install ts-node --save-dev
+        cd __tests__
+        npm run test
+        npm run coverage
+
+    - name: Run tests and coverage for RabbitMqClient
+      if: contains(env.changed_folders, 'RabbitMqClient')
+      run: |
+        cd RabbitMqClient
+        npm install
+        npm install ts-node --save-dev
+        cd __tests__
+        npm run test
+        npm run coverage
+
+    - name: Run tests and coverage for RedisClient
+      if: contains(env.changed_folders, 'RedisClient')
+      run: |
+        cd RedisClient
+        npm install
+        npm install ts-node --save-dev
+        cd __tests__
+        npm run test
+        npm run coverage
+
+    - name: Run tests and coverage for Supervision
+      if: contains(env.changed_folders, 'Supervision')
+      run: |
+        cd Supervision
         npm install
         npm install ts-node --save-dev
         cd __tests__
