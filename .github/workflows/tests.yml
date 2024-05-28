@@ -21,21 +21,30 @@ jobs:
       - name: Get list of changed files
         id: changes
         run: |
-          echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | tr '\n' ' ')"
+          git fetch origin development
+          CHANGED_FILES=$(git diff --name-only origin/development ${{ github.sha }} | tr '\n' ' ')
+          echo "Changed files: $CHANGED_FILES"
+          echo "::set-output name=files::$CHANGED_FILES"
 
       - name: Set changed folders
         id: folders
         run: |
-          FILES=${{ steps.changes.outputs.files }}
+          FILES="${{ steps.changes.outputs.files }}"
+          echo "Files changed: $FILES"
           FOLDERS=$(echo "$FILES" | tr ' ' '\n' | grep -E '^(CommonMessages|Logger|RabbitMqClient|RedisClient|Supervision)/' | cut -d/ -f1 | sort | uniq)
-          echo "::set-output name=folders::${FOLDERS}"
+          echo "Folders detected: $FOLDERS"
+          echo "::set-output name=folders::$FOLDERS"
 
       - name: Run tests and coverage
         run: |
-          for folder in ${{ steps.folders.outputs.folders }}; do
+          FOLDERS="${{ steps.folders.outputs.folders }}"
+          echo "Running tests for folders: $FOLDERS"
+          for folder in $FOLDERS; do
             cd $folder
+            echo "Installing dependencies in $folder"
             npm install
             cd __tests__
+            echo "Running tests in $folder/__tests__"
             npm run test
             npm run coverage
             cd ../..
