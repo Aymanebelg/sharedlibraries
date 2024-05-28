@@ -73,7 +73,7 @@ describe('handleAsync', () => {
     expect(asyncHandler).toHaveBeenCalledWith(req, res, next)
     expect(next).not.toHaveBeenCalledWith(expect.any(Error))
   })
-}) 
+})  
 
 describe('errorHandlerMiddleware', () => {
   it('should handle ApiError correctly', () => {
