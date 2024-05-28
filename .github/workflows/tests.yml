@@ -29,6 +29,7 @@ jobs:
       id: detect_changes
       run: |
         CHANGED_FOLDERS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^(CommonMessages|Logger|RabbitMqClient|RedisClient|Supervision)' | sort -u)
+        echo "Changed folders: $CHANGED_FOLDERS"
         echo "changed_folders=$CHANGED_FOLDERS" >> $GITHUB_ENV
         echo "::set-output name=changed_folders::$CHANGED_FOLDERS"
 
@@ -41,6 +42,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
+    - name: Log changed folders
+      run: |
+        echo "Running tests for folders: ${{ env.changed_folders }}"
 
     - name: Run tests and coverage
       if: contains(env.changed_folders, matrix.folder)
