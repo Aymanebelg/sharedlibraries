@@ -1,6 +1,6 @@
-name: Log Changed Folders
+name: Log Changed Folder
 
-on: 
+on:
   push:
     paths:
       - 'CommonMessages/**'
@@ -8,65 +8,37 @@ on:
       - 'RabbitMqClient/**'
       - 'RedisClient/**'
       - 'Supervision/**'
-      - '.github/workflows/tests.yml'
+  pull_request:
+    paths:
+      - 'CommonMessages/**'
+      - 'Logger/**'
+      - 'RabbitMqClient/**'
+      - 'RedisClient/**'
+      - 'Supervision/**'
 
 jobs:
-  check_changes:
+  log_changed_folder:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Check for changes in CommonMessages
-        id: common_messages
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^CommonMessages/'; then
-            echo "::set-output name=common_messages::CommonMessages"
-          fi
+    - name: Log changed folder
+      id: detect-changes
+      run: |
+        if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^CommonMessages/'; then
+          echo "::set-output name=folder::CommonMessages"
+        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Logger/'; then
+          echo "::set-output name=folder::Logger"
+        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RabbitMqClient/'; then
+          echo "::set-output name=folder::RabbitMqClient"
+        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RedisClient/'; then
+          echo "::set-output name=folder::RedisClient"
+        elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Supervision/'; then
+          echo "::set-output name=folder::Supervision"
+        else
+          echo "::set-output name=folder::None"
 
-      - name: Check for changes in Logger
-        id: logger
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Logger/'; then
-            echo "::set-output name=logger::Logger"
-          fi
-
-      - name: Check for changes in RabbitMqClient
-        id: rabbitmq_client
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RabbitMqClient/'; then
-            echo "::set-output name=rabbitmq_client::RabbitMqClient"
-          fi
-
-      - name: Check for changes in RedisClient
-        id: redis_client
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^RedisClient/'; then
-            echo "::set-output name=redis_client::RedisClient"
-          fi
-
-      - name: Check for changes in Supervision
-        id: supervision
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^Supervision/'; then
-            echo "::set-output name=supervision::Supervision"
-          fi
-
-      - name: Log changed folders
-        run: |
-          echo "Changed folders:"
-          if [ "${{ steps.common_messages.outputs.common_messages }}" ]; then
-            echo "CommonMessages"
-          fi
-          if [ "${{ steps.logger.outputs.logger }}" ]; then
-            echo "Logger"
-          fi
-          if [ "${{ steps.rabbitmq_client.outputs.rabbitmq_client }}" ]; then
-            echo "RabbitMqClient"
-          fi
-          if [ "${{ steps.redis_client.outputs.redis_client }}" ]; then
-            echo "RedisClient"
-          fi
-          if [ "${{ steps.supervision.outputs.supervision }}" ]; then
-            echo "Supervision"
-          fi
+    - name: Log the changed folder
+      run: echo "The changed folder is ${{ steps.detect-changes.outputs.folder }}"
