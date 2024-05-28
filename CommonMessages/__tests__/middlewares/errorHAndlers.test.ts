@@ -65,7 +65,7 @@ describe('handleAsync', () => {
     const req = {} as Request
     const res = {} as Response
     const next = jest.fn() as unknown as NextFunction
-    const asyncHandler c=fjest5.fn().mockResolvedValue(undefined)
+    const asyncHandler = jest.fn().mockResolvedValue(undefined)
 
     const wrappedHandler = handleAsync(asyncHandler)
     await wrappedHandler(req, res, next)
