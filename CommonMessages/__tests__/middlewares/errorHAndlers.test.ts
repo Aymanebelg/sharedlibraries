@@ -119,7 +119,7 @@ describe('errorHandlerMiddleware', () => {
       json: jest.fn()  
     } as unknown as Response
     const next = jest.fn() as unknown as NextFunction
-  
+
     const errorBody: errorBody = { status: StatusCode.BAD_REQUEST, name: ErrorTypes.BAD_REQUEST, details: 'Bad request' }
     const apiError = new ApiError(errorBody, logger)
  
@@ -128,7 +128,7 @@ describe('errorHandlerMiddleware', () => {
  
     expect(res.status).toHaveBeenCalledWith(StatusCode.BAD_REQUEST)
     expect(res.json).toHaveBeenCalledWith({ error: { name: ErrorTypes.BAD_REQUEST, details: 'Bad request'}      })
-      
+     
   })     
 })   
    

@@ -3,7 +3,7 @@ name: Folder Changes
 on: [push]
 
 jobs:
-  test:
+  test_and_coverage:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -21,86 +21,28 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Set up matrix for test jobs
-      id: set_test_matrix
+    - name: Run tests and coverage for changed folders
       run: |
         folders=("CommonMessages" "Logger" "RedisClient" "RabbitMqClient" "Supervision")
-        test_jobs=""
+
+        echo "Checking changes between commits $previous_commit and $current_commit"
 
         for folder in "${folders[@]}"; do
           if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
-            test_jobs="$test_jobs{\"folder\": \"$folder\"},"
+            echo "$folder has changed"
+
+            # Test
+            echo "Running npm test in $folder"
+            cd $folder
+            npm install
+            npm run test
+            cd ..
+
+            # Coverage
+            echo "Running npm coverage in $folder"
+            cd $folder
+            npm install
+            npm run coverage
+            cd ..
           fi
         done
-
-        # Remove the trailing comma and wrap in array
-        test_jobs="[${test_jobs%,}]"
-        echo "test_jobs=$test_jobs" >> $GITHUB_ENV
-        echo "::set-output name=test_jobs::$test_jobs"
-
-  test_dynamic:
-    runs-on: ubuntu-latest
-    needs: [test]
-    strategy:
-      matrix:
-        folder: ${{ fromJson(needs.test.outputs.test_jobs) }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Run tests
-      run: |
-        cd ${{ matrix.folder }}
-        npm install
-        npm run test
-
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Fetch all history for all branches and tags
-      run: git fetch --prune --unshallow
-
-    - name: Determine the commit range
-      id: commit_range
-      run: |
-        previous_commit=$(git rev-parse HEAD~1)
-        current_commit=$(git rev-parse HEAD)
-
-        echo "previous_commit=$previous_commit" >> $GITHUB_ENV
-        echo "current_commit=$current_commit" >> $GITHUB_ENV
-
-    - name: Set up matrix for coverage jobs
-      id: set_coverage_matrix
-      run: |
-        folders=("CommonMessages" "Logger" "RedisClient" "RabbitMqClient" "Supervision")
-        coverage_jobs=""
-
-        for folder in "${folders[@]}"; do
-          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
-            coverage_jobs="$coverage_jobs{\"folder\": \"$folder\"},"
-          fi
-        done
-
-        # Remove the trailing comma and wrap in array
-        coverage_jobs="[${coverage_jobs%,}]"
-        echo "coverage_jobs=$coverage_jobs" >> $GITHUB_ENV
-        echo "::set-output name=coverage_jobs::$coverage_jobs"
-
-  coverage_dynamic:
-    runs-on: ubuntu-latest
-    needs: [coverage]
-    strategy:
-      matrix:
-        folder: ${{ fromJson(needs.coverage.outputs.coverage_jobs) }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Run coverage
-      run: |
-        cd ${{ matrix.folder }}
-        npm install
-        npm run coverage
