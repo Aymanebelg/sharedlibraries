@@ -68,7 +68,7 @@ describe('Logger Module', () => {
       timestamp: '2024-05-24 12:00:00',
       label: 'testLabel'
     }) as TransformableInfo;
-
+ 
     expect(logEntry.level).toBe('INFO'); 
   });
 
