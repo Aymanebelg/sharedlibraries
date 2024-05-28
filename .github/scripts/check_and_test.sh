@@ -2,7 +2,7 @@
 set -e
 
 # Navigate to the sharedLibraries directory
-cd sharedLibraries
+cd sharedLibraries/sharedLibraries
 
 # Loop through each folder in sharedLibraries
 for dir in */ ; do
