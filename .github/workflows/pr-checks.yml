@@ -40,8 +40,11 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 20
 
     - name: Fetch all history for all branches and tags
       run: git fetch --prune --unshallow
@@ -68,6 +71,11 @@ jobs:
             cd ..
           fi
         done
+    - name: Code Coverage Report
+      uses: romeovs/lcov-reporter-action@v0.3.1
+      with:
+       lcov-file: ./coverage/lcov.info
+       delete-old-comments: true
   check-pr-title:
           runs-on: ubuntu-latest
           permissions:
