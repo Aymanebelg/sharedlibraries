@@ -17,72 +17,35 @@ on:
       - '**/Supervision/**'
 
 jobs:
-  test:
+  detect_changes:
     runs-on: ubuntu-latest
-
+    outputs:
+      changed_folders: ${{ steps.detect_changes.outputs.changed_folders }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Check for changed folders
-      id: check_folders
+    - name: Detect changed folders
+      id: detect_changes
       run: |
-        CHANGED_FOLDERS=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -oE '^(CommonMessages|Logger|RabbitMqClient|RedisClient|Supervision)' | sort -u)
-        echo "Changed folders: $CHANGED_FOLDERS"
+        CHANGED_FOLDERS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^(CommonMessages|Logger|RabbitMqClient|RedisClient|Supervision)' | sort -u)
         echo "changed_folders=$CHANGED_FOLDERS" >> $GITHUB_ENV
+        echo "::set-output name=changed_folders::$CHANGED_FOLDERS"
 
-    - name: Run tests and coverage for CommonMessages
-      if: contains(env.changed_folders, 'CommonMessages')
-      run: |
-        cd CommonMessages
-        npm install
-        npm install ts-node --save-dev
-        cd __tests__
-        npm run test
-        npm run coverage
+  test:
+    needs: detect_changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder: [CommonMessages, Logger, RabbitMqClient, RedisClient, Supervision]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-    - name: Run tests and coverage for Logger
-      if: contains(env.changed_folders, 'Logger')
+    - name: Run tests and coverage
+      if: contains(env.changed_folders, matrix.folder)
       run: |
-        cd Logger
-        npm install
-        npm install ts-node --save-dev
-        cd __tests__
-        npm run test
-        npm run coverage
-
-    - name: Run tests and coverage for RabbitMqClient
-      if: contains(env.changed_folders, 'RabbitMqClient')
-      run: |
-        cd RabbitMqClient
-        npm install
-        npm install ts-node --save-dev
-        cd __tests__
-        npm run test
-        npm run coverage
-
-    - name: Run tests and coverage for RedisClient
-      if: contains(env.changed_folders, 'RedisClient')
-      run: |
-        cd RedisClient
-        npm install
-        npm install ts-node --save-dev
-        cd __tests__
-        npm run test
-        npm run coverage
-
-    - name: Run tests and coverage for Supervision
-      if: contains(env.changed_folders, 'Supervision')
-      run: |
-        cd Supervision
+        cd ${{ matrix.folder }}
         npm install
         npm install ts-node --save-dev
         cd __tests__
