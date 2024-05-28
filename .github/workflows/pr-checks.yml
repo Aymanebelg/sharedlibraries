@@ -23,19 +23,10 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Check for folder changes and run tests
+    - name: Run tests if folder changes detected
       run: |
-        echo "Checking changes between commits $previous_commit and $current_commit"
-        for folder in $(ls -d */ | cut -f1 -d'/'); do
-          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
-            echo "$folder has changed"
-            echo "Running npm test in $folder"
-            cd $folder
-            npm install
-            npm run test
-            cd ..
-          fi
-        done
+        chmod +x .github/scripts/run_tests.sh
+        .github/scripts/run_tests.sh $previous_commit $current_commit test
 
   coverage:
     runs-on: ubuntu-latest
@@ -58,30 +49,18 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Check for folder changes and run coverage
+    - name: Run coverage if folder changes detected
       run: |
-        echo "Checking changes between commits $previous_commit and $current_commit"
-        for folder in $(ls -d */ | cut -f1 -d'/'); do
-          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
-            echo "$folder has changed"
-            echo "Running npm coverage in $folder"
-            cd $folder
-            npm install
-            npm run coverage
-            cd ..
-          fi
-        done
-    - name: Code Coverage Report
-      uses: romeovs/lcov-reporter-action@v0.3.1
-      with:
-       lcov-file: ./coverage/lcov.info
-       delete-old-comments: true
+        chmod +x .github/scripts/run_tests.sh
+        .github/scripts/run_tests.sh $previous_commit $current_commit coverage
+        
   check-pr-title:
-          runs-on: ubuntu-latest
-          permissions:
-            pull-requests: write
-          steps:
-            - name: Check Title Format
-              uses: deepakputhraya/action-pr-title@master
-              with:
-                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check Title Format
+        uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
