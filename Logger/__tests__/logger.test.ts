@@ -71,7 +71,7 @@ describe('Logger Module', () => {
  
     expect(logEntry.level).toBe('INFO'); 
   });  
- 
+  
   test('logger should use the provided path label if given', () => {
     const customPath = 'custom/path/to/module';
     const testLogger = logger(undefined, customPath);
