@@ -45,10 +45,10 @@ jobs:
 
     - name: Log changed folders
       run: |
-        echo "Running tests for folders: ${{ env.changed_folders }}"
+        echo "Running tests for folders: ${{ needs.detect_changes.outputs.changed_folders }}"
 
     - name: Run tests and coverage
-      if: contains(env.changed_folders, matrix.folder)
+      if: contains(needs.detect_changes.outputs.changed_folders, matrix.folder)
       run: |
         cd ${{ matrix.folder }}
         npm install
