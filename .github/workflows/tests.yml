@@ -1,6 +1,6 @@
 name: Run Tests and Coverage
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   test:
@@ -14,16 +14,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'  # or the Node.js version your project uses
-
-    - name: Install dependencies
-      run: npm install
-
     - name: Run tests and coverage for ${{ matrix.folder }}
       run: |
-        cd ${{ matrix.folder }}/__tests__
+        cd ${{ matrix.folder }}
+        npm install
+        cd __tests__
         npm run test
         npm run coverage
