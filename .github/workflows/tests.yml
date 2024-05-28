@@ -18,7 +18,6 @@ jobs:
       run: |
         cd ${{ matrix.folder }}
         npm install
-        npm install ts-node --save-dev
         cd __tests__
         npm run test
         npm run coverage
