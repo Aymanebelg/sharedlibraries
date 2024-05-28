@@ -1,6 +1,20 @@
 name: Run Tests and Coverage
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - '**/CommonMessages/**'
+      - '**/Logger/**'
+      - '**/RabbitMqClient/**'
+      - '**/RedisClient/**'
+      - '**/Supervision/**'
+  pull_request:
+    paths:
+      - '**/CommonMessages/**'
+      - '**/Logger/**'
+      - '**/RabbitMqClient/**'
+      - '**/RedisClient/**'
+      - '**/Supervision/**'
 
 jobs:
   test:
@@ -15,6 +29,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Run tests and coverage for ${{ matrix.folder }}
+      if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed') }}
       run: |
         cd ${{ matrix.folder }}
         npm install
