@@ -26,11 +26,11 @@ jobs:
       run: |
         folders=$(find . -maxdepth 1 -type d | sed 's|./||' | grep -v '^\.$' | grep -v '.git')
         echo "folders=$folders" >> $GITHUB_ENV
-        echo "::set-output name=folders::$folders"
+        echo "folders=$folders" > folders.txt
 
     - name: Check for folder changes and run tests
       run: |
-        folders="${{ steps.get_folders.outputs.folders }}"
+        folders=$(cat folders.txt)
         previous_commit=${{ env.previous_commit }}
         current_commit=${{ env.current_commit }}
 
@@ -71,11 +71,11 @@ jobs:
       run: |
         folders=$(find . -maxdepth 1 -type d | sed 's|./||' | grep -v '^\.$' | grep -v '.git')
         echo "folders=$folders" >> $GITHUB_ENV
-        echo "::set-output name=folders::$folders"
+        echo "folders=$folders" > folders.txt
 
     - name: Check for folder changes and run coverage
       run: |
-        folders="${{ steps.get_folders.outputs.folders }}"
+        folders=$(cat folders.txt)
         previous_commit=${{ env.previous_commit }}
         current_commit=${{ env.current_commit }}
 
