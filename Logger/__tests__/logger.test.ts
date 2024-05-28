@@ -70,7 +70,7 @@ describe('Logger Module', () => {
     }) as TransformableInfo;
  
     expect(logEntry.level).toBe('INFO'); 
-  });
+  }); 
 
   test('logger should use the provided path label if given', () => {
     const customPath = 'custom/path/to/module';
