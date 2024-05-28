@@ -55,3 +55,21 @@ jobs:
         fi
       env:
         changed_folders: ${{ env.changed_folders }}
+
+    - name: Run npm commands for changed folders
+      if: env.changed_folders != ''
+      run: |
+        # Convert the space-separated list of changed folders into an array
+        IFS=' ' read -r -a folders_array <<< "$changed_folders"
+
+        # Loop through each changed folder and run npm commands
+        for folder in "${folders_array[@]}"; do
+          echo "Running npm commands in $folder"
+          cd $folder
+          npm install
+          npm run test
+          npm run coverage
+          cd ..
+        done
+      env:
+        changed_folders: ${{ env.changed_folders }}
