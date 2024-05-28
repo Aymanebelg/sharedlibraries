@@ -3,7 +3,7 @@ name: Folder Changes
 on: [push]
 
 jobs:
-  test_and_coverage:
+  test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -21,24 +21,52 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Run tests and coverage for changed folders
+    - name: Check for folder changes and run tests
       run: |
         folders=("CommonMessages" "Logger" "RedisClient" "RabbitMqClient" "Supervision")
+        changed_folders=""
 
         echo "Checking changes between commits $previous_commit and $current_commit"
 
         for folder in "${folders[@]}"; do
           if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
             echo "$folder has changed"
-
-            # Test
             echo "Running npm test in $folder"
             cd $folder
             npm install
             npm run test
             cd ..
+          fi
+        done
 
-            # Coverage
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Fetch all history for all branches and tags
+      run: git fetch --prune --unshallow
+
+    - name: Determine the commit range
+      id: commit_range
+      run: |
+        previous_commit=$(git rev-parse HEAD~1)
+        current_commit=$(git rev-parse HEAD)
+
+        echo "previous_commit=$previous_commit" >> $GITHUB_ENV
+        echo "current_commit=$current_commit" >> $GITHUB_ENV
+
+    - name: Check for folder changes and run coverage
+      run: |
+        folders=("CommonMessages" "Logger" "RedisClient" "RabbitMqClient" "Supervision")
+        changed_folders=""
+
+        echo "Checking changes between commits $previous_commit and $current_commit"
+
+        for folder in "${folders[@]}"; do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
             echo "Running npm coverage in $folder"
             cd $folder
             npm install

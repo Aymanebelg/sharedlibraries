@@ -65,7 +65,7 @@ describe('Logger Module', () => {
     const logEntry = testLogger.format.transform({
       level: 'info',
       message: 'Test message',
-      timestamp: '2024-05-24 12:00:00',
+      timestamp: '2024-05-24 12:00:00', 
       label: 'testLabel'
     }) as TransformableInfo;
  
