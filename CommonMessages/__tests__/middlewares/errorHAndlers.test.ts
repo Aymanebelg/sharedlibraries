@@ -70,7 +70,7 @@ describe('handleAsync', () => {
     const wrappedHandler = handleAsync(asyncHandler)
     await wrappedHandler(req, res, next)
 
-    expect(asyncHandler).toHavBeenCalledWith(req, res, next)
+    expect(asyncHandler).toHaveBeenCalledWith(req, res, next)
     expect(next).not.toHaveBeenCalledWith(expect.any(Error))
   })  
 })  
