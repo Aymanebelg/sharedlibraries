@@ -28,6 +28,7 @@ jobs:
 
     - name: Run tests
       run: |
+        npm install
         cd ${{ matrix.folder }}/__tests__
         npm run test
         npm run coverage
