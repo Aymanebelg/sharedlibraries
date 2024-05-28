@@ -12,9 +12,6 @@ jobs:
     - name: Fetch all history for all branches and tags
       run: git fetch --prune --unshallow
 
-    - name: Setup script permissions
-      run: chmod +x ./.github/scripts/check-and-run.sh
-
     - name: Determine the commit range
       id: commit_range
       run: |
@@ -25,7 +22,18 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run tests
-      run: ./.github/scripts/check-and-run.sh test
+      run: |
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
+            echo "Running npm test in $folder"
+            cd $folder
+            npm install
+            npm run test
+            cd ..
+          fi
+        done
 
   coverage:
     runs-on: ubuntu-latest
@@ -35,9 +43,6 @@ jobs:
 
     - name: Fetch all history for all branches and tags
       run: git fetch --prune --unshallow
-
-    - name: Setup script permissions
-      run: chmod +x ./.github/scripts/check-and-run.sh
 
     - name: Determine the commit range
       id: commit_range
@@ -49,4 +54,15 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run coverage
-      run: ./.github/scripts/check-and-run.sh coverage
+      run: |
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
+            echo "Running npm coverage in $folder"
+            cd $folder
+            npm install
+            npm run coverage
+            cd ..
+          fi
+        done
