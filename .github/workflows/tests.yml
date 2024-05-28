@@ -20,18 +20,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        folder: [CommonMessages, Logger, RabbitMqClient, RedisClient, Supervision]
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Run tests and coverage for ${{ matrix.folder }}
+    - name: Determine changed folder
+      id: determine_folder
+      run: |
+        CHANGED_FOLDER=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^(\S+)/' | head -1)
+        echo "::set-output name=folder::$CHANGED_FOLDER"
+
+    - name: Run tests and coverage
       if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed') }}
       run: |
-        cd ${{ matrix.folder }}
+        cd ${{ steps.determine_folder.outputs.folder }}
         npm install
         npm install ts-node --save-dev
         cd __tests__
