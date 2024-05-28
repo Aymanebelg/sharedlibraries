@@ -69,7 +69,7 @@ describe('Logger Module', () => {
       label: 'testLabel'
     }) as TransformableInfo;
 
-    expect(logEntry.level).toBe('INFO');
+    expect(logEntry.level).toBe('INFO'); 
   });
 
   test('logger should use the provided path label if given', () => {
