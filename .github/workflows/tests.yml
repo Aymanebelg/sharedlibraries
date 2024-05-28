@@ -46,30 +46,25 @@ jobs:
         # Save the changed folders to be used in the next step
         echo "changed_folders=$changed_folders" >> $GITHUB_ENV
 
-    - name: Log changed folders
-      run: |
-        if [ -n "$changed_folders" ]; then
-          echo "The following folders have changed: $changed_folders"
-        else
-          echo "No specified folders have changed."
-        fi
-      env:
-        changed_folders: ${{ env.changed_folders }}
+    - name: Set output for changed folders
+      id: output
+      run: echo "::set-output name=changed_folders::${{ env.changed_folders }}"
 
-    - name: Run npm commands for changed folders
-      if: env.changed_folders != ''
-      run: |
-        # Convert the space-separated list of changed folders into an array
-        IFS=' ' read -r -a folders_array <<< "$changed_folders"
+  test-folders:
+    needs: check-folder-changes
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.check-folder-changes.outputs.changed_folders) }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-        # Loop through each changed folder and run npm commands
-        for folder in "${folders_array[@]}"; do
-          echo "Running npm commands in $folder"
-          cd $folder
-          npm install
-          npm run test
-          npm run coverage
-          cd ..
-        done
-      env:
-        changed_folders: ${{ env.changed_folders }}
+    - name: Run npm commands
+      run: |
+        echo "Running npm commands in ${{ matrix.folder }}"
+        cd ${{ matrix.folder }}
+        npm install
+        npm run test
+        npm run coverage
