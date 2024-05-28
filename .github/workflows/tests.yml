@@ -22,7 +22,7 @@ jobs:
         id: changes
         run: |
           git fetch origin development
-          CHANGED_FILES=$(git diff --name-only origin/development ${{ github.sha }} | tr '\n' ' ')
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | tr '\n' ' ')
           echo "Changed files: $CHANGED_FILES"
           echo "::set-output name=files::$CHANGED_FILES"
 
