@@ -11,5 +11,5 @@ for folder in $(ls -d */ | cut -f1 -d'/'); do
   fi
 done
 
-# Return the list of changed folders as a space-separated string
-echo "${changed_folders[@]}"
+# Return the list of changed folders as a newline-separated string
+IFS=$'\n' echo "${changed_folders[*]}"

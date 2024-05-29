@@ -30,18 +30,18 @@ jobs:
       id: detect_changed_folders
       run: |
         changed_folders=$(./.github/scripts/detect_changed_folders.sh ${{ env.previous_commit }} ${{ env.current_commit }})
-        echo "changed_folders=$changed_folders" >> $GITHUB_ENV
+        echo "$changed_folders" | tr '\n' ' ' > changed_folders.txt
 
     - name: Run npm test in changed folders
       run: |
-        for folder in ${{ env.changed_folders }}; do
+        while read -r folder; do
           echo "$folder has changed"
           echo "Running npm test in $folder"
           cd $folder
           npm install
           npm run test
           cd ..
-        done
+        done < changed_folders.txt
 
   coverage:
     runs-on: ubuntu-latest
@@ -71,18 +71,18 @@ jobs:
       id: detect_changed_folders
       run: |
         changed_folders=$(./.github/scripts/detect_changed_folders.sh ${{ env.previous_commit }} ${{ env.current_commit }})
-        echo "changed_folders=$changed_folders" >> $GITHUB_ENV
+        echo "$changed_folders" | tr '\n' ' ' > changed_folders.txt
 
     - name: Run npm coverage in changed folders
       run: |
-        for folder in ${{ env.changed_folders }}; do
+        while read -r folder; do
           echo "$folder has changed"
           echo "Running npm coverage in $folder"
           cd $folder
           npm install
           npm run coverage
           cd ..
-        done
+        done < changed_folders.txt
 
   check-pr-title:
     runs-on: ubuntu-latest
