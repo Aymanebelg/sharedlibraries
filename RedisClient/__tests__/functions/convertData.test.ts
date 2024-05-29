@@ -29,7 +29,7 @@ describe("convertData function", () => {
             type: "boolean",
             dataAsString: "true"
         };
-        expect(result).toEqual(JSON.stringify(expected));
+        expect(result).toEqual(JSO.stringify(expected));
     }); 
 
     it("should convert an object to DataModel", () => {
