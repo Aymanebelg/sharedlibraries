@@ -11,7 +11,7 @@ const logger = {
   warn: jest.fn(),
   info: jest.fn()
 } as unknown as winston.Logger
-    
+      
 describe('routeNotFoundHandlerMiddleware', () => {
   it('should create an ApiError and pass it to next', () => {
     const req = {
@@ -20,7 +20,7 @@ describe('routeNotFoundHandlerMiddleware', () => {
     const res = {} as Response
     const next = jest.fn() as unknown as NextFunction 
      
-        
+         
     const middleware = routeNotFoundHandlerMiddleware(logger)
     middleware(req, res, next)
     

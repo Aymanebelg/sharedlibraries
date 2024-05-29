@@ -46,7 +46,7 @@ describe('Logger Module', () => {
 
     expect(logMessage).toContain('[] Test message');
   });   
-
+ 
   test('logger should format log messages correctly', () => {
     const testLogger = logger(mockModule);
     const logEntry = testLogger.format.transform({
