@@ -23,6 +23,9 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
+    - name: Set execute permissions for run_tests.sh
+      run: chmod +x .github/scripts/run_tests.sh
+
     - name: Check for folder changes and run tests
       run: .github/scripts/run_tests.sh ${{ env.previous_commit }} ${{ env.current_commit }}
 
@@ -46,6 +49,9 @@ jobs:
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
+
+    - name: Set execute permissions for run_tests.sh
+      run: chmod +x .github/scripts/run_tests.sh
 
     - name: Check for folder changes and run coverage
       run: .github/scripts/run_tests.sh ${{ env.previous_commit }} ${{ env.current_commit }}
