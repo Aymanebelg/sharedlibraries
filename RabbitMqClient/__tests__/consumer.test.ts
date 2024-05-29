@@ -140,7 +140,7 @@ describe("consumeMessages", () => {
     closeCallback();
     expect(logger.info).toHaveBeenCalledWith("AMQP Connection closed");
   });
-
+ 
   it("should correctly bind to a different routing key", async () => {
     const mockCallback = jest.fn();
     const differentRoutingKey = "test_topic";
