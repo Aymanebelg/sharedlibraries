@@ -11,7 +11,7 @@ const logger = {
   warn: jest.fn(),
   info: jest.fn()
 } as unknown as winston.Logger
-   
+    
 describe('routeNotFoundHandlerMiddleware', () => {
   it('should create an ApiError and pass it to next', () => {
     const req = {
