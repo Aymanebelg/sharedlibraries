@@ -76,4 +76,3 @@ jobs:
         uses: deepakputhraya/action-pr-title@master
         with:
           regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
