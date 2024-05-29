@@ -27,7 +27,6 @@ jobs:
         for folder in $changed_folders; do
           if [ -d "$folder/__tests__" ]; then
             echo "$folder has changed and contains __tests__ folder"
-            echo "Running npm test in $folder"
             cd $folder
             npm install
             npm run test
@@ -57,7 +56,6 @@ jobs:
         for folder in $changed_folders; do
           if [ -d "$folder/__tests__" ]; then
             echo "$folder has changed and contains __tests__ folder"
-            echo "Running npm coverage in $folder"
             cd $folder
             npm install
             npm run coverage
