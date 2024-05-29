@@ -29,7 +29,7 @@ describe('routeNotFoundHandlerMiddleware', () => {
     expect(error.errorBody.status).toBe(StatusCode.NOT_FOUND)
     expect(error.errorBody.name).toBe(ErrorTypes.ROUTE_NOT_FOUND)
   })
-
+ 
   it('should create an ApiError for a different URL and pass it to next', () => {
     const req = {
       originalUrl: '/different-url'

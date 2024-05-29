@@ -14,4 +14,3 @@ for folder in $(ls -d */ | cut -f1 -d'/'); do
     cd ..
   fi
 done
- 
