@@ -45,7 +45,7 @@ describe('Logger Module', () => {
     })[Symbol.for('message')];
 
     expect(logMessage).toContain('[] Test message');
-  });  
+  });   
 
   test('logger should format log messages correctly', () => {
     const testLogger = logger(mockModule);

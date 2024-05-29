@@ -1,6 +1,8 @@
-name: Folder Changes
+name: Quality Assurance GitHub Actions Workflow
 
-on: [pull_request]
+on:
+  pull_request:
+    branches: [development]
 
 jobs:
   test:
@@ -15,7 +17,11 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git rev-parse HEAD~1)
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          previous_commit=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        else
+          previous_commit=$(git rev-parse HEAD~1)
+        fi
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
@@ -47,7 +53,11 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git rev-parse HEAD~1)
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          previous_commit=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        else
+          previous_commit=$(git rev-parse HEAD~1)
+        fi
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
@@ -66,3 +76,14 @@ jobs:
             cd ..
           fi
         done
+  
+  check-pr-title:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check Title Format
+        uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
