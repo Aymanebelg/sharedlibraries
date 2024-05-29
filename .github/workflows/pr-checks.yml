@@ -38,14 +38,9 @@ jobs:
         echo "Checking changes between commits $previous_commit and $current_commit"
         changed_files=$(git diff --name-only $previous_commit $current_commit)
         echo "Changed files: $changed_files"
-        changed_folders=$(echo "$changed_files" | grep '/' | cut -d'/' -f1 | sort -u)
-        if [ -z "$changed_folders" ]; then
-          echo "No folder changes detected."
-          exit 0
-        fi
-        for folder in $changed_folders; do
-          if [ -d "$folder/__tests__" ]; then
-            echo "$folder/__tests__ exists and has changed"
+        for folder in $(find . -type d -name "__tests__" | cut -d'/' -f2 | sort -u); do
+          if echo "$changed_files" | grep -q "^$folder/"; then
+            echo "$folder has changes in __tests__"
             echo "Running npm test in $folder"
             cd $folder
             npm install
@@ -91,14 +86,9 @@ jobs:
         echo "Checking changes between commits $previous_commit and $current_commit"
         changed_files=$(git diff --name-only $previous_commit $current_commit)
         echo "Changed files: $changed_files"
-        changed_folders=$(echo "$changed_files" | grep '/' | cut -d'/' -f1 | sort -u)
-        if [ -z "$changed_folders" ]; then
-          echo "No folder changes detected."
-          exit 0
-        fi
-        for folder in $changed_folders; do
-          if [ -d "$folder/__tests__" ]; then
-            echo "$folder/__tests__ exists and has changed"
+        for folder in $(find . -type d -name "__tests__" | cut -d'/' -f2 | sort -u); do
+          if echo "$changed_files" | grep -q "^$folder/"; then
+            echo "$folder has changes in __tests__"
             echo "Running npm coverage in $folder"
             cd $folder
             npm install
