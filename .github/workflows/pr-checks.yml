@@ -11,15 +11,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        fetch-depth: 2  # Fetch the last 2 commits
+        fetch-depth: 2  # Fetch only the last 2 commits
 
     - name: Fetch all history for all branches and tags
       run: |
-        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
-          git fetch --prune --unshallow
-        else
-          git fetch --prune
-        fi
+        git fetch origin +refs/pull/${{ github.event.number }}/merge
 
     - name: Determine the commit range
       id: commit_range
@@ -54,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 2  # Fetch the last 2 commits
+        fetch-depth: 2  # Fetch only the last 2 commits
 
     - name: Setup Node.js
       uses: actions/setup-node@v1
@@ -63,11 +59,7 @@ jobs:
 
     - name: Fetch all history for all branches and tags
       run: |
-        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
-          git fetch --prune --unshallow
-        else
-          git fetch --prune
-        fi
+        git fetch origin +refs/pull/${{ github.event.number }}/merge
 
     - name: Determine the commit range
       id: commit_range
