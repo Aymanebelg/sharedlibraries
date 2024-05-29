@@ -24,18 +24,7 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run tests
-      run: |
-        echo "Checking changes between commits $previous_commit and $current_commit"
-        for folder in $(ls -d */ | cut -f1 -d'/'); do
-          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
-            echo "$folder has changed"
-            echo "Running npm test in $folder"
-            cd $folder
-            npm install
-            npm run test
-            cd ..
-          fi
-        done
+      run: .github/scripts/run_tests.sh ${{ env.previous_commit }} ${{ env.current_commit }}
 
   coverage:
     runs-on: ubuntu-latest
@@ -59,27 +48,15 @@ jobs:
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run coverage
-      run: |
-        echo "Checking changes between commits $previous_commit and $current_commit"
-        for folder in $(ls -d */ | cut -f1 -d'/'); do
-          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
-            echo "$folder has changed"
-            echo "Running npm coverage in $folder"
-            cd $folder
-            npm install
-            npm run coverage
-            cd ..
-          fi
-        done
-        
-  check-pr-title:
-          runs-on: ubuntu-latest
-          permissions:
-            pull-requests: write
-          steps:
-            - name: Check Title Format
-              uses: deepakputhraya/action-pr-title@master
-              with:
-                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
-                github_token: ${{ secrets.GITHUB_TOKEN }}
+      run: .github/scripts/run_tests.sh ${{ env.previous_commit }} ${{ env.current_commit }}
 
+  check-pr-title:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check Title Format
+        uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
