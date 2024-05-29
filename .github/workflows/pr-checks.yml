@@ -10,23 +10,26 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+
+    - name: Fetch all history for all branches and tags
+      run: git fetch --prune --unshallow
 
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        previous_commit=$(git rev-parse HEAD~1)
         current_commit=$(git rev-parse HEAD)
+
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run tests
       run: |
-        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | grep '/' | cut -d/ -f1 | sort -u)
-        for folder in $changed_folders; do
-          if [ -d "$folder/__tests__" ]; then
-            echo "$folder has changed and contains __tests__ folder"
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
+            echo "Running npm test in $folder"
             cd $folder
             npm install
             npm run test
@@ -37,39 +40,45 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
       with:
-        fetch-depth: 0
+        node-version: 20
+
+    - name: Fetch all history for all branches and tags
+      run: git fetch --prune --unshallow
 
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        previous_commit=$(git rev-parse HEAD~1)
         current_commit=$(git rev-parse HEAD)
+
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
     - name: Check for folder changes and run coverage
       run: |
-        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | grep '/' | cut -d/ -f1 | sort -u)
-        for folder in $changed_folders; do
-          if [ -d "$folder/__tests__" ]; then
-            echo "$folder has changed and contains __tests__ folder"
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
+            echo "Running npm coverage in $folder"
             cd $folder
             npm install
             npm run coverage
             cd ..
           fi
         done
-
+        
   check-pr-title:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Check Title Format
-        uses: deepakputhraya/action-pr-title@master
-        with:
-          regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          runs-on: ubuntu-latest
+          permissions:
+            pull-requests: write
+          steps:
+            - name: Check Title Format
+              uses: deepakputhraya/action-pr-title@master
+              with:
+                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+                github_token: ${{ secrets.GITHUB_TOKEN }}
