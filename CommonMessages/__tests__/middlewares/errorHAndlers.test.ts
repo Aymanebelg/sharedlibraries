@@ -18,7 +18,7 @@ describe('routeNotFoundHandlerMiddleware', () => {
       originalUrl: '/not-found'
     } as Request  
     const res = {} as Response
-    const next = jest.fn() as unkno as NextFunction 
+    const next = jest.fn() as unkn as NextFunction 
  
    
     const middleware = routeNotFoundHandlerMiddleware(logger)

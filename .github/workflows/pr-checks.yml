@@ -7,7 +7,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: Dev
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -23,17 +22,22 @@ jobs:
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
-    - uses: actions/setup-node@v1
-      with:
-       node-version: 20
-    - name: Set execute permissions for run_tests.sh
-      run: chmod +x .github/scripts/run_tests.sh
 
     - name: Check for folder changes and run tests
-      run: .github/scripts/run_tests.sh ${{ env.previous_commit }} ${{ env.current_commit }}
+      run: |
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
+            echo "Running npm test in $folder"
+            cd $folder
+            npm install
+            npm run test
+            cd ..
+          fi
+        done
 
   coverage:
-    environment: Dev
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -54,26 +58,27 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Set execute permissions for run_coverage.sh
-      run: chmod +x .github/scripts/run_coverage.sh
-    - name: Code Coverage Report
-      uses: romeovs/lcov-reporter-action@v0.3.1
-      with:
-        github-token: ${{ secrets.GH_PAT }}
-        lcov-file: ./coverage/lcov.info
-        delete-old-comments: true
-
     - name: Check for folder changes and run coverage
-      run: .github/scripts/run_coverage.sh ${{ env.previous_commit }} ${{ env.current_commit }}
-
+      run: |
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
+            echo "Running npm coverage in $folder"
+            cd $folder
+            npm install
+            npm run coverage
+            cd ..
+          fi
+        done
+        
   check-pr-title:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Check Title Format
-        uses: deepakputhraya/action-pr-title@master
-        with:
-          regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
+          runs-on: ubuntu-latest
+          permissions:
+            pull-requests: write
+          steps:
+            - name: Check Title Format
+              uses: deepakputhraya/action-pr-title@master
+              with:
+                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+                github_token: ${{ secrets.GITHUB_TOKEN }}
