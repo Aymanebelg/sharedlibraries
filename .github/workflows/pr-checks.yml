@@ -1,8 +1,6 @@
-name: Quality Assurance GitHub Actions Workflow
+name: Folder Changes
 
-on:
-  pull_request:
-    branches: [development]
+on: [push]
 
 jobs:
   test:
@@ -40,11 +38,8 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 20
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
     - name: Fetch all history for all branches and tags
       run: git fetch --prune --unshallow
@@ -71,14 +66,3 @@ jobs:
             cd ..
           fi
         done
-        
-  check-pr-title:
-          runs-on: ubuntu-latest
-          permissions:
-            pull-requests: write
-          steps:
-            - name: Check Title Format
-              uses: deepakputhraya/action-pr-title@master
-              with:
-                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
-                github_token: ${{ secrets.GITHUB_TOKEN }}
