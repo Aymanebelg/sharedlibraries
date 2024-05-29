@@ -123,3 +123,4 @@ describe('connectivityCheckController', () => {
         expect(mockRes.json).toHaveBeenCalledWith({ mongoDb: true, rabbitMq: true, redis: true });
     });
 });
+ 

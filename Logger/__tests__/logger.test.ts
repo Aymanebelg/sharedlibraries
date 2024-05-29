@@ -45,7 +45,7 @@ describe('Logger Module', () => {
     })[Symbol.for('message')];
 
     expect(logMessage).toContain('[] Test message');
-  });
+  });   
 
   test('logger should format log messages correctly', () => {
     const testLogger = logger(mockModule);
@@ -55,11 +55,11 @@ describe('Logger Module', () => {
       timestamp: '2024-05-24 12:00:00',
       label: 'src/module/testFile.ts'
     }) as TransformableInfo;
-
+ 
     const formattedMessage = logEntry[Symbol.for('message')];
     expect(formattedMessage).toMatch(/INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \[src\/module\/testFile\.ts\] Test message/);
   });
-  
+   
   test('logger should uppercase log levels', () => {
     const testLogger = logger(mockModule);
     const logEntry = testLogger.format.transform({
@@ -70,8 +70,8 @@ describe('Logger Module', () => {
     }) as TransformableInfo;
  
     expect(logEntry.level).toBe('INFO'); 
-  });  
-  
+  });   
+    
   test('logger should use the provided path label if given', () => {
     const customPath = 'custom/path/to/module';
     const testLogger = logger(undefined, customPath);

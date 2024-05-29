@@ -131,7 +131,7 @@ describe("consumeMessages", () => {
 
     expect(mockConnection.on).toHaveBeenCalledWith("error", expect.any(Function));
     expect(mockConnection.on).toHaveBeenCalledWith("close", expect.any(Function));
-
+ 
     const errorCallback = mockConnection.on.mock.calls[0][1];
     errorCallback(new Error("Connection error"));
     expect(logger.error).toHaveBeenCalledWith("AMQP Connection error:", "Connection error");
@@ -140,11 +140,11 @@ describe("consumeMessages", () => {
     closeCallback();
     expect(logger.info).toHaveBeenCalledWith("AMQP Connection closed");
   });
-
+ 
   it("should correctly bind to a different routing key", async () => {
     const mockCallback = jest.fn();
     const differentRoutingKey = "test_topic";
-
+ 
     const consumer = consumeMessages(() => logger);
     await consumer("test_topic", differentRoutingKey, mockCallback);
 

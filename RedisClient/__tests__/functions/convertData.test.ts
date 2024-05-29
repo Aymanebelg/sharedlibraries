@@ -30,7 +30,7 @@ describe("convertData function", () => {
             dataAsString: "true"
         };
         expect(result).toEqual(JSON.stringify(expected));
-    });
+    }); 
 
     it("should convert an object to DataModel", () => {
         const input = { key: "value" };

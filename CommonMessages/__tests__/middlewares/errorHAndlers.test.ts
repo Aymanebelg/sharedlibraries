@@ -5,30 +5,31 @@ import ApiError from '../../utils/ApiError'
 import StatusCode from '../../utils/StatusCode'
 import ErrorTypes from '../../utils/errorTypes'
 import type errorBody from '../../models/errorBody'
-
+ 
 const logger = {
   error: jest.fn(),
   warn: jest.fn(),
   info: jest.fn()
 } as unknown as winston.Logger
-
+    
 describe('routeNotFoundHandlerMiddleware', () => {
   it('should create an ApiError and pass it to next', () => {
     const req = {
       originalUrl: '/not-found'
-    } as Request
+    } as Request   
     const res = {} as Response
-    const next = jest.fn() as unknown as NextFunction
-
+    const next = jest.fn() as unknown as NextFunction 
+     
+        
     const middleware = routeNotFoundHandlerMiddleware(logger)
     middleware(req, res, next)
-
+    
     expect(next).toHaveBeenCalledWith(expect.any(ApiError))
     const error = (next as jest.Mock).mock.calls[0][0] as ApiError
     expect(error.errorBody.status).toBe(StatusCode.NOT_FOUND)
     expect(error.errorBody.name).toBe(ErrorTypes.ROUTE_NOT_FOUND)
   })
-
+ 
   it('should create an ApiError for a different URL and pass it to next', () => {
     const req = {
       originalUrl: '/different-url'
