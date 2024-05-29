@@ -7,6 +7,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: Dev
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -22,28 +23,17 @@ jobs:
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
+    - uses: actions/setup-node@v1
+      with:
+       node-version: 20
+    - name: Set execute permissions for run_tests.sh
+      run: chmod +x .github/scripts/run_tests.sh
 
-    - name: Set execute permissions for detect_changed_folders.sh
-      run: chmod +x .github/scripts/detect_changed_folders.sh
-
-    - name: Detect changed folders
-      id: detect_changed_folders
-      run: |
-        changed_folders=$(./.github/scripts/detect_changed_folders.sh ${{ env.previous_commit }} ${{ env.current_commit }})
-        echo "$changed_folders" | tr '\n' ' ' > changed_folders.txt
-
-    - name: Run npm test in changed folders
-      run: |
-        while read -r folder; do
-          echo "$folder has changed"
-          echo "Running npm test in $folder"
-          cd $folder
-          npm install
-          npm run test
-          cd ..
-        done < changed_folders.txt
+    - name: Check for folder changes and run tests
+      run: .github/scripts/run_tests.sh ${{ env.previous_commit }} ${{ env.current_commit }}
 
   coverage:
+    environment: Dev
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -64,25 +54,17 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Set execute permissions for detect_changed_folders.sh
-      run: chmod +x .github/scripts/detect_changed_folders.sh
+    - name: Set execute permissions for run_coverage.sh
+      run: chmod +x .github/scripts/run_coverage.sh
+    - name: Code Coverage Report
+      uses: romeovs/lcov-reporter-action@v0.3.1
+      with:
+        github-token: ${{ secrets.GH_PAT }}
+        lcov-file: ./coverage/lcov.info
+        delete-old-comments: true
 
-    - name: Detect changed folders
-      id: detect_changed_folders
-      run: |
-        changed_folders=$(./.github/scripts/detect_changed_folders.sh ${{ env.previous_commit }} ${{ env.current_commit }})
-        echo "$changed_folders" | tr '\n' ' ' > changed_folders.txt
-
-    - name: Run npm coverage in changed folders
-      run: |
-        while read -r folder; do
-          echo "$folder has changed"
-          echo "Running npm coverage in $folder"
-          cd $folder
-          npm install
-          npm run coverage
-          cd ..
-        done < changed_folders.txt
+    - name: Check for folder changes and run coverage
+      run: .github/scripts/run_coverage.sh ${{ env.previous_commit }} ${{ env.current_commit }}
 
   check-pr-title:
     runs-on: ubuntu-latest
@@ -94,3 +76,6 @@ jobs:
         with:
           regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+          
