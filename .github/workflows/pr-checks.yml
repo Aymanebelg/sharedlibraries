@@ -24,11 +24,7 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        if [ "$GITHUB_BASE_REF" != "" ]; then
-          previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-        else
-          previous_commit=$(git rev-parse HEAD~1)
-        fi
+        previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
@@ -40,7 +36,9 @@ jobs:
     - name: Check for folder changes and run tests
       run: |
         echo "Checking changes between commits $previous_commit and $current_commit"
-        changed_folders=$(git diff --name-only $previous_commit $current_commit | grep '/' | cut -d'/' -f1 | sort -u)
+        changed_files=$(git diff --name-only $previous_commit $current_commit)
+        echo "Changed files: $changed_files"
+        changed_folders=$(echo "$changed_files" | grep '/' | cut -d'/' -f1 | sort -u)
         if [ -z "$changed_folders" ]; then
           echo "No folder changes detected."
           exit 0
@@ -79,11 +77,7 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        if [ "$GITHUB_BASE_REF" != "" ]; then
-          previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-        else
-          previous_commit=$(git rev-parse HEAD~1)
-        fi
+        previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
@@ -95,7 +89,9 @@ jobs:
     - name: Check for folder changes and run coverage
       run: |
         echo "Checking changes between commits $previous_commit and $current_commit"
-        changed_folders=$(git diff --name-only $previous_commit $current_commit | grep '/' | cut -d'/' -f1 | sort -u)
+        changed_files=$(git diff --name-only $previous_commit $current_commit)
+        echo "Changed files: $changed_files"
+        changed_folders=$(echo "$changed_files" | grep '/' | cut -d'/' -f1 | sort -u)
         if [ -z "$changed_folders" ]; then
           echo "No folder changes detected."
           exit 0
