@@ -9,12 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
-
-    - name: Fetch all history for all branches and tags
-      run: git fetch --prune --unshallow
 
     - name: Determine the commit range
       id: commit_range
@@ -42,12 +39,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
-
-    - name: Fetch all history for all branches and tags
-      run: git fetch --prune --unshallow
 
     - name: Determine the commit range
       id: commit_range
