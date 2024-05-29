@@ -11,24 +11,32 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        fetch-depth: 2  # Fetch only the last 2 commits
+        fetch-depth: 2  # Fetch the last 2 commits
+
+    - name: Fetch all history for all branches and tags
+      run: |
+        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
+          git fetch --prune --unshallow
+        else
+          git fetch --prune
+        fi
 
     - name: Determine the commit range
       id: commit_range
       run: |
-        base_commit=$(jq -r '.pull_request.base.sha' < $GITHUB_EVENT_PATH)
-        head_commit=$(jq -r '.pull_request.head.sha' < $GITHUB_EVENT_PATH)
+        previous_commit=$(git rev-parse HEAD~1)
+        current_commit=$(git rev-parse HEAD)
 
-        echo "base_commit=$base_commit" >> $GITHUB_ENV
-        echo "head_commit=$head_commit" >> $GITHUB_ENV
+        echo "previous_commit=$previous_commit" >> $GITHUB_ENV
+        echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-        echo "Base commit: $base_commit"
-        echo "Head commit: $head_commit"
+        echo "Previous commit: $previous_commit"
+        echo "Current commit: $current_commit"
 
     - name: Check for folder changes and run tests
       run: |
-        echo "Checking changes between commits $base_commit and $head_commit"
-        changed_files=$(git diff --name-only $base_commit $head_commit)
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        changed_files=$(git diff --name-only $previous_commit $current_commit)
         echo "Changed files: $changed_files"
         for folder in $(find . -type d -name "__tests__" | cut -d'/' -f2 | sort -u); do
           if echo "$changed_files" | grep -q "^$folder/"; then
@@ -46,29 +54,37 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 2  # Fetch only the last 2 commits
+        fetch-depth: 2  # Fetch the last 2 commits
 
     - name: Setup Node.js
       uses: actions/setup-node@v1
       with:
         node-version: 20
 
+    - name: Fetch all history for all branches and tags
+      run: |
+        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
+          git fetch --prune --unshallow
+        else
+          git fetch --prune
+        fi
+
     - name: Determine the commit range
       id: commit_range
       run: |
-        base_commit=$(jq -r '.pull_request.base.sha' < $GITHUB_EVENT_PATH)
-        head_commit=$(jq -r '.pull_request.head.sha' < $GITHUB_EVENT_PATH)
+        previous_commit=$(git rev-parse HEAD~1)
+        current_commit=$(git rev-parse HEAD)
 
-        echo "base_commit=$base_commit" >> $GITHUB_ENV
-        echo "head_commit=$head_commit" >> $GITHUB_ENV
+        echo "previous_commit=$previous_commit" >> $GITHUB_ENV
+        echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-        echo "Base commit: $base_commit"
-        echo "Head commit: $head_commit"
+        echo "Previous commit: $previous_commit"
+        echo "Current commit: $current_commit"
 
     - name: Check for folder changes and run coverage
       run: |
-        echo "Checking changes between commits $base_commit and $head_commit"
-        changed_files=$(git diff --name-only $base_commit $head_commit)
+        echo "Checking changes between commits $previous_commit and $current_commit"
+        changed_files=$(git diff --name-only $previous_commit $current_commit)
         echo "Changed files: $changed_files"
         for folder in $(find . -type d -name "__tests__" | cut -d'/' -f2 | sort -u); do
           if echo "$changed_files" | grep -q "^$folder/"; then
