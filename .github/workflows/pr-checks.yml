@@ -11,7 +11,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0
+        fetch-depth: 2  # Fetch only the last 2 commits
 
     - name: Fetch all history for all branches and tags
       run: |
@@ -24,7 +24,7 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+        previous_commit=$(git rev-parse HEAD~1)
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
@@ -54,7 +54,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 0
+        fetch-depth: 2  # Fetch only the last 2 commits
 
     - name: Setup Node.js
       uses: actions/setup-node@v1
@@ -72,7 +72,7 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+        previous_commit=$(git rev-parse HEAD~1)
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
