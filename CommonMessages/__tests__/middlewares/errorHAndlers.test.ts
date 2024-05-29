@@ -23,7 +23,7 @@ describe('routeNotFoundHandlerMiddleware', () => {
        
     const middleware = routeNotFoundHandlerMiddleware(logger)
     middleware(req, res, next)
- 
+  
     expect(next).toHaveBeenCalledWith(expect.any(ApiError))
     const error = (next as jest.Mock).mock.calls[0][0] as ApiError
     expect(error.errorBody.status).toBe(StatusCode.NOT_FOUND)

@@ -6,7 +6,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: Dev
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -22,9 +21,6 @@ jobs:
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '20'
     - name: Check for folder changes and run tests
       run: |
         echo "Checking changes between commits $previous_commit and $current_commit"
