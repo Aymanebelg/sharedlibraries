@@ -1,10 +1,12 @@
-name: Folder Changes
+name: Quality Assurance GitHub Actions Workflow
 
-on: [push]
-
+on:
+  pull_request:
+    branches: [development]
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: Dev
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -20,7 +22,9 @@ jobs:
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
-
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '20'
     - name: Check for folder changes and run tests
       run: |
         echo "Checking changes between commits $previous_commit and $current_commit"
@@ -36,10 +40,15 @@ jobs:
         done
 
   coverage:
+    environment: Dev
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 20
 
     - name: Fetch all history for all branches and tags
       run: git fetch --prune --unshallow
@@ -66,6 +75,12 @@ jobs:
             cd ..
           fi
         done
+    - name: Code Coverage Report
+      uses: romeovs/lcov-reporter-action@v0.3.1
+      with:
+        github-token: ${{ secrets.GH_PAT }}
+        lcov-file: ./coverage/lcov.info
+        delete-old-comments: true
   
   check-pr-title:
     runs-on: ubuntu-latest
@@ -76,3 +91,4 @@ jobs:
         uses: deepakputhraya/action-pr-title@master
         with:
           regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
