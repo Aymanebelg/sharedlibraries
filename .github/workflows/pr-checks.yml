@@ -7,19 +7,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: Dev
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 2  # Fetch the last 2 commits
 
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 20
     - name: Fetch all history for all branches and tags
-      run: |
-        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
-          git fetch --prune --unshallow
-        else
-          git fetch --prune
-        fi
+      run: git fetch --prune --unshallow
 
     - name: Determine the commit range
       id: commit_range
@@ -30,17 +27,12 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-        echo "Previous commit: $previous_commit"
-        echo "Current commit: $current_commit"
-
     - name: Check for folder changes and run tests
       run: |
         echo "Checking changes between commits $previous_commit and $current_commit"
-        changed_files=$(git diff --name-only $previous_commit $current_commit)
-        echo "Changed files: $changed_files"
-        for folder in $(find . -type d -name "__tests__" | cut -d'/' -f2 | sort -u); do
-          if echo "$changed_files" | grep -q "^$folder/"; then
-            echo "$folder has changes in __tests__"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
             echo "Running npm test in $folder"
             cd $folder
             npm install
@@ -50,24 +42,17 @@ jobs:
         done
 
   coverage:
+    environment: Dev
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 2  # Fetch the last 2 commits
-
     - name: Setup Node.js
       uses: actions/setup-node@v1
       with:
         node-version: 20
 
     - name: Fetch all history for all branches and tags
-      run: |
-        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
-          git fetch --prune --unshallow
-        else
-          git fetch --prune
-        fi
+      run: git fetch --prune --unshallow
 
     - name: Determine the commit range
       id: commit_range
@@ -78,17 +63,12 @@ jobs:
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
         echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-        echo "Previous commit: $previous_commit"
-        echo "Current commit: $current_commit"
-
     - name: Check for folder changes and run coverage
       run: |
         echo "Checking changes between commits $previous_commit and $current_commit"
-        changed_files=$(git diff --name-only $previous_commit $current_commit)
-        echo "Changed files: $changed_files"
-        for folder in $(find . -type d -name "__tests__" | cut -d'/' -f2 | sort -u); do
-          if echo "$changed_files" | grep -q "^$folder/"; then
-            echo "$folder has changes in __tests__"
+        for folder in $(ls -d */ | cut -f1 -d'/'); do
+          if git diff --name-only $previous_commit $current_commit | grep -q "^$folder/"; then
+            echo "$folder has changed"
             echo "Running npm coverage in $folder"
             cd $folder
             npm install
@@ -96,14 +76,20 @@ jobs:
             cd ..
           fi
         done
+    - name: Code Coverage Report
+      uses: romeovs/lcov-reporter-action@v0.3.1
+      with:
+        github-token: ${{ secrets.GH_PAT }}
+        lcov-file: ./coverage/lcov.info
+        delete-old-comments: true
         
   check-pr-title:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Check Title Format
-        uses: deepakputhraya/action-pr-title@master
-        with:
-          regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          runs-on: ubuntu-latest
+          permissions:
+            pull-requests: write
+          steps:
+            - name: Check Title Format
+              uses: deepakputhraya/action-pr-title@master
+              with:
+                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+                github_token: ${{ secrets.GITHUB_TOKEN }}
