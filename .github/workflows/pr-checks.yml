@@ -23,10 +23,10 @@ jobs:
 
     - name: Check for folder changes and run tests
       run: |
-        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | cut -d/ -f1 | uniq)
+        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | grep '/' | cut -d/ -f1 | sort -u)
         for folder in $changed_folders; do
-          if [ -d "$folder" ]; then
-            echo "$folder has changed"
+          if [ -d "$folder/__tests__" ]; then
+            echo "$folder has changed and contains __tests__ folder"
             echo "Running npm test in $folder"
             cd $folder
             npm install
@@ -53,10 +53,10 @@ jobs:
 
     - name: Check for folder changes and run coverage
       run: |
-        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | cut -d/ -f1 | uniq)
+        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | grep '/' | cut -d/ -f1 | sort -u)
         for folder in $changed_folders; do
-          if [ -d "$folder" ]; then
-            echo "$folder has changed"
+          if [ -d "$folder/__tests__" ]; then
+            echo "$folder has changed and contains __tests__ folder"
             echo "Running npm coverage in $folder"
             cd $folder
             npm install
