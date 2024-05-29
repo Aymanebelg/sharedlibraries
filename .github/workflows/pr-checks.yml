@@ -9,62 +9,66 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-    - name: Fetch list of changed files
-      id: changed_files
-      run: |
-        changed_files=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
-          | jq -r '.[].filename')
-        echo "changed_files=$changed_files" >> $GITHUB_ENV
+    - name: Fetch all history for all branches and tags
+      run: git fetch --prune --unshallow
 
-    - name: Determine changed folders
-      id: determine_folders
+    - name: Determine the commit range
+      id: commit_range
       run: |
-        changed_folders=$(echo "${{ env.changed_files }}" | grep -o '^[^/]*' | uniq)
-        echo "changed_folders=$changed_folders" >> $GITHUB_ENV
+        previous_commit=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        current_commit=$(git rev-parse HEAD)
+        echo "previous_commit=$previous_commit" >> $GITHUB_ENV
+        echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Run npm test in changed folders
+    - name: Check for folder changes and run tests
       run: |
-        for folder in ${{ env.changed_folders }}; do
-          echo "$folder has changed"
-          echo "Running npm test in $folder"
-          cd $folder
-          npm install
-          npm run test
-          cd ..
+        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | cut -d/ -f1 | uniq)
+        for folder in $changed_folders; do
+          if [ -d "$folder" ]; then
+            echo "$folder has changed"
+            echo "Running npm test in $folder"
+            cd $folder
+            npm install
+            npm run test
+            cd ..
+          fi
         done
 
   coverage:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-    - name: Fetch list of changed files
-      id: changed_files
-      run: |
-        changed_files=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
-          | jq -r '.[].filename')
-        echo "changed_files=$changed_files" >> $GITHUB_ENV
+    - name: Fetch all history for all branches and tags
+      run: git fetch --prune --unshallow
 
-    - name: Determine changed folders
-      id: determine_folders
+    - name: Determine the commit range
+      id: commit_range
       run: |
-        changed_folders=$(echo "${{ env.changed_files }}" | grep -o '^[^/]*' | uniq)
-        echo "changed_folders=$changed_folders" >> $GITHUB_ENV
+        previous_commit=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        current_commit=$(git rev-parse HEAD)
+        echo "previous_commit=$previous_commit" >> $GITHUB_ENV
+        echo "current_commit=$current_commit" >> $GITHUB_ENV
 
-    - name: Run npm coverage in changed folders
+    - name: Check for folder changes and run coverage
       run: |
-        for folder in ${{ env.changed_folders }}; do
-          echo "$folder has changed"
-          echo "Running npm coverage in $folder"
-          cd $folder
-          npm install
-          npm run coverage
-          cd ..
+        changed_folders=$(git diff --name-only ${{ env.previous_commit }} ${{ env.current_commit }} | cut -d/ -f1 | uniq)
+        for folder in $changed_folders; do
+          if [ -d "$folder" ]; then
+            echo "$folder has changed"
+            echo "Running npm coverage in $folder"
+            cd $folder
+            npm install
+            npm run coverage
+            cd ..
+          fi
         done
 
   check-pr-title:
