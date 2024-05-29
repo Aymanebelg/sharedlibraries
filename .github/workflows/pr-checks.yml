@@ -17,7 +17,11 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git rev-parse HEAD~1)
+        if [ "$GITHUB_BASE_REF" != "" ]; then
+          previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+        else
+          previous_commit=$(git rev-parse HEAD~1)
+        fi
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
@@ -52,7 +56,11 @@ jobs:
     - name: Determine the commit range
       id: commit_range
       run: |
-        previous_commit=$(git rev-parse HEAD~1)
+        if [ "$GITHUB_BASE_REF" != "" ]; then
+          previous_commit=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+        else
+          previous_commit=$(git rev-parse HEAD~1)
+        fi
         current_commit=$(git rev-parse HEAD)
 
         echo "previous_commit=$previous_commit" >> $GITHUB_ENV
@@ -73,12 +81,12 @@ jobs:
         done
         
   check-pr-title:
-          runs-on: ubuntu-latest
-          permissions:
-            pull-requests: write
-          steps:
-            - name: Check Title Format
-              uses: deepakputhraya/action-pr-title@master
-              with:
-                regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
-                github_token: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check Title Format
+        uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: '^(feat|fix|refactor|docs|test):\s\[\w+-\d+\]\s.+$'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
