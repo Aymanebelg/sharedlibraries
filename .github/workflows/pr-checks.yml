@@ -47,7 +47,7 @@ jobs:
         fi
         for folder in $changed_folders; do
           if [ -d "$folder/__tests__" ]; then
-            echo "$folder has changed"
+            echo "$folder/__tests__ exists and has changed"
             echo "Running npm test in $folder"
             cd $folder
             npm install
@@ -102,7 +102,7 @@ jobs:
         fi
         for folder in $changed_folders; do
           if [ -d "$folder/__tests__" ]; then
-            echo "$folder has changed"
+            echo "$folder/__tests__ exists and has changed"
             echo "Running npm coverage in $folder"
             cd $folder
             npm install
