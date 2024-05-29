@@ -16,7 +16,7 @@ describe('routeNotFoundHandlerMiddleware', () => {
   it('should create an ApiError and pass it to next', () => {
     const req = {
       originalUrl: '/not-found'
-    } as Request  
+    } as Request   
     const res = {} as Response
     const next = jest.fn() as unknown as NextFunction 
   
