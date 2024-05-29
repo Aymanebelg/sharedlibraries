@@ -14,7 +14,10 @@ jobs:
         fetch-depth: 0
 
     - name: Fetch all history for all branches and tags
-      run: git fetch --prune --unshallow
+      run: |
+        if git rev-parse --is-shallow-repository; then
+          git fetch --prune --unshallow
+        fi
 
     - name: Determine the commit range
       id: commit_range
@@ -62,7 +65,10 @@ jobs:
         node-version: 20
 
     - name: Fetch all history for all branches and tags
-      run: git fetch --prune --unshallow
+      run: |
+        if git rev-parse --is-shallow-repository; then
+          git fetch --prune --unshallow
+        fi
 
     - name: Determine the commit range
       id: commit_range
