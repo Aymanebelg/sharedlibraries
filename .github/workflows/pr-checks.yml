@@ -15,8 +15,10 @@ jobs:
 
     - name: Fetch all history for all branches and tags
       run: |
-        if git rev-parse --is-shallow-repository; then
+        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
           git fetch --prune --unshallow
+        else
+          git fetch --prune
         fi
 
     - name: Determine the commit range
@@ -66,8 +68,10 @@ jobs:
 
     - name: Fetch all history for all branches and tags
       run: |
-        if git rev-parse --is-shallow-repository; then
+        if [ $(git rev-parse --is-shallow-repository) == "true" ]; then
           git fetch --prune --unshallow
+        else
+          git fetch --prune
         fi
 
     - name: Determine the commit range
@@ -101,6 +105,8 @@ jobs:
           npm install
           npm run coverage
           cd ..
+       
+
         done
         
   check-pr-title:
