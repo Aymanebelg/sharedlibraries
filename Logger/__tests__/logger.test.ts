@@ -59,7 +59,7 @@ describe('Logger Module', () => {
     const formattedMessage = logEntry[Symbol.for('message')];
     expect(formattedMessage).toMatch(/INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \[src\/module\/testFile\.ts\] Test message/);
   });
-  
+   
   test('logger should uppercase log levels', () => {
     const testLogger = logger(mockModule);
     const logEntry = testLogger.format.transform({

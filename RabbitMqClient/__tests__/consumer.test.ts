@@ -131,7 +131,7 @@ describe("consumeMessages", () => {
 
     expect(mockConnection.on).toHaveBeenCalledWith("error", expect.any(Function));
     expect(mockConnection.on).toHaveBeenCalledWith("close", expect.any(Function));
-
+ 
     const errorCallback = mockConnection.on.mock.calls[0][1];
     errorCallback(new Error("Connection error"));
     expect(logger.error).toHaveBeenCalledWith("AMQP Connection error:", "Connection error");
